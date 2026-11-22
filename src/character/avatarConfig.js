@@ -29,7 +29,7 @@ export const avatarConfig = {
   // Model scale and transform offsets
   scale: 0.6,
   positionOffset: [0, 0, 2],
-  rotationOffset: [0, MATHPI, 0], // Rotated to face forward along negative Z
+  rotationOffset: [0, Math.PI, 0], // Rotated to face forward along negative Z
 
   // Walkable Route Boundary Constraints:
   // Keeps the avatar strictly within the star path corridor so it cannot wander into space or asteroids
