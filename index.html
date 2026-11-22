@@ -1,23 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>HYH Portfolio</title>
-  <style>
-    html,
-    body {
-      margin: 0;
-      height: 100%;
-      overflow: hidden;
-      background: #080818;
-    }
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="description" content="Rafia Gull - Aspiring Game Developer & Computer Science Student (Gaming & Animation). Interactive 3D Planetary Journey Portfolio." />
+  <title>Rafia Gull | 3D Game Development Portfolio</title>
 
-    canvas {
-      display: block;
-    }
-  </style>
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="./styles/style.css" />
+
+  <!-- Three.js Import Map -->
   <script type="importmap">
     {
       "imports": {
@@ -29,7 +21,125 @@
 </head>
 
 <body>
+  <!-- 3D WebGL Canvas Container -->
+  <div id="canvas-container"></div>
+
+  <!-- HUD Interface Overlay -->
+  <div id="hud">
+    <!-- Top Bar -->
+    <header class="hud-header">
+      <div class="brand-badge">
+        <div class="brand-status-dot"></div>
+        <div class="brand-text-col">
+          <span class="brand-name">RAFIA GULL</span>
+          <span class="brand-role">GAMING & ANIMATION</span>
+        </div>
+      </div>
+
+      <!-- Quick Teleport Waypoint Navigation -->
+      <nav class="quick-nav-bar" aria-label="Waypoint Navigation">
+        <button class="nav-warp-btn" data-warp-target="spawn" title="Return to Arrival Platform">Arrival</button>
+        <button class="nav-warp-btn" data-warp-target="about" title="Warp to Command Hub">About</button>
+        <button class="nav-warp-btn" data-warp-target="projects" title="Warp to Orbital Hangar">Projects</button>
+        <button class="nav-warp-btn" data-warp-target="skills" title="Warp to Cyber Lab">Skills</button>
+        <button class="nav-warp-btn" data-warp-target="contact" title="Warp to Deep Space Relay">Contact</button>
+      </nav>
+
+      <!-- Audio and Help Actions -->
+      <div class="hud-actions-right">
+        <button id="audio-toggle-btn" class="hud-icon-btn" title="Toggle Synthesized Audio">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+          <span>AUDIO OFF</span>
+        </button>
+
+        <button id="help-toggle-btn" class="hud-icon-btn" title="Flight Controls & Help">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>CONTROLS</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Center Interaction Prompt -->
+    <div class="interaction-container">
+      <div id="interaction-prompt" class="interaction-prompt">
+        <span class="key-badge">E</span>
+        <span id="interaction-text" class="interaction-text">ACCESS STATION</span>
+      </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <footer class="hud-footer">
+      <div id="hud-coords" class="telemetry-card">
+        <span>POS:</span> X 0.0 | Z 0.0 <span style="margin-left:8px;">HDG:</span> 0°
+      </div>
+
+      <!-- AI Companion Droid Trigger -->
+      <button id="chat-toggle-btn" class="companion-orb-btn" title="Open ASTRA AI Companion">
+        <div class="ai-avatar-ring"></div>
+        <span>ASTRA AI</span>
+      </button>
+    </footer>
+  </div>
+
+  <!-- Virtual Joystick for Touch Devices -->
+  <div id="mobile-controls">
+    <div id="virtual-joystick-zone" class="joystick-zone">
+      <div id="virtual-joystick-handle" class="joystick-handle"></div>
+    </div>
+  </div>
+
+  <!-- Interactive Section Modal -->
+  <div id="modal-overlay">
+    <div class="modal-window">
+      <div class="modal-header-bar">
+        <div class="modal-header-text">
+          <h2 id="modal-title">STATION BRIEFING</h2>
+          <p id="modal-subtitle">Orbital Sector Telemetry</p>
+        </div>
+        <button id="modal-close-btn" class="modal-close-button" aria-label="Close Modal">&times;</button>
+      </div>
+      <div id="modal-body" class="modal-scroll-content">
+        <!-- Dynamic content rendered by UIManager -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Grounded AI Chat Companion Widget -->
+  <div id="chat-widget">
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <div class="chat-bot-avatar">✦</div>
+        <div class="chat-title-box">
+          <h3>ASTRA // AI COMPANION</h3>
+          <span>GROUNDED ON PORTFOLIO DATA</span>
+        </div>
+      </div>
+      <button id="chat-close-btn" class="chat-close-btn" aria-label="Close Chat">&times;</button>
+    </div>
+
+    <div id="chat-messages" class="chat-messages">
+      <!-- Chat messages dynamically rendered -->
+    </div>
+
+    <div id="chat-suggestions" class="chat-suggestions">
+      <!-- Suggestion chips dynamically rendered -->
+    </div>
+
+    <div class="chat-input-bar">
+      <input type="text" id="chat-input" placeholder="Ask ASTRA about Rafia's work..." autocomplete="off" />
+      <button id="chat-send-btn" class="chat-send-btn">Send</button>
+    </div>
+  </div>
+
+  <!-- Main JavaScript Application Module -->
   <script type="module" src="./portfolio.js"></script>
 </body>
-
 </html>

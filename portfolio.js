@@ -1,41 +1,122 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'jsm/controls/OrbitControls.js';
-import { GLTFLoader } from 'jsm/loaders/GLTFLoader.js';
+import { SpaceScene } from './src/scene/spaceScene.js';
+import { LandmarkManager } from './src/scene/landmarks.js';
+import { AvatarController } from './src/character/avatarController.js';
+import { InputManager } from './src/controls/inputManager.js';
+import { AudioManager } from './src/audio/audioManager.js';
+import { GroundedChat } from './src/chat/groundedChat.js';
+import { UIManager } from './src/ui/uiManager.js';
 
-//initial browser dimensions settings
-const w = window.innerWidth;
-const h = window.innerHeight;
-const renderer = new THREE.WebGLRenderer({
-  antialias: true
-});
-renderer.setSize(w, h);
+class PortfolioApp {
+  constructor() {
+    this.container = document.getElementById('canvas-container') || document.body;
+    this.clock = new THREE.Clock();
 
-document.body.appendChild(renderer.domElement);
+    this.initRenderer();
+    this.initScene();
+    this.initModules();
+    this.initEvents();
 
-//camera
-const fov = 100;
-const aspect = w / h;
-const near = 0.1;
-const far = 10;
+    this.animate();
+  }
 
-const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-//scene
-const scene = new THREE.Scene();
-scene.add(camera);
-//controls
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.003;
+  initRenderer() {
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      powerPreference: 'high-performance'
+    });
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-scene.background = new THREE.Color(0x87ceeb);
+    this.container.appendChild(this.renderer.domElement);
+  }
 
-//light
-const atmLight = new THREE.AmbientLight(0xccccff, 1);
-scene.add(atmLight);
+  initScene() {
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0x060814);
+    this.scene.fog = new THREE.FogExp2(0x060814, 0.005);
 
-function animate(t = 0) {
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
-  controls.update();
+    // Third-person perspective camera
+    this.camera = new THREE.PerspectiveCamera(
+      65,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      800
+    );
+  }
+
+  initModules() {
+    // 1. Synthesized Audio Engine
+    this.audio = new AudioManager();
+
+    // 2. Space Environment & Procedural Starfield
+    this.spaceScene = new SpaceScene(this.scene);
+
+    // 3. Third-Person Character & Camera Rig
+    this.avatar = new AvatarController(this.scene, this.camera, this.renderer.domElement);
+
+    // 4. Grounded AI Chat Companion
+    this.chat = new GroundedChat();
+
+    // 5. Input Manager
+    this.input = new InputManager(this.renderer.domElement, () => {
+      this.ui.handleInteractAction();
+    });
+
+    // Connect camera controls to Input Manager
+    this.input.onCameraRotate = (deltaYaw, deltaPitch) => {
+      this.avatar.rotateCamera(deltaYaw, deltaPitch);
+    };
+
+    this.input.onCameraZoom = (deltaZoom) => {
+      this.avatar.zoom(deltaZoom);
+    };
+
+    // 6. Interactive 3D Sector Landmarks
+    this.landmarks = new LandmarkManager(this.scene);
+
+    // 7. HUD & Modal UI Manager
+    this.ui = new UIManager(this.avatar, this.audio, this.chat);
+  }
+
+  initEvents() {
+    window.addEventListener('resize', () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      this.camera.aspect = w / h;
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize(w, h);
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    });
+  }
+
+  animate() {
+    requestAnimationFrame(() => this.animate());
+
+    const delta = Math.min(this.clock.getDelta(), 0.1);
+
+    // Update player locomotion & camera
+    this.avatar.update(delta, this.input);
+
+    // Update space environment features
+    this.spaceScene.update(delta);
+
+    // Update landmarks animation & check proximity to avatar
+    this.landmarks.update(delta, this.avatar.position, (nearbyLandmark) => {
+      this.ui.onProximityChanged(nearbyLandmark);
+    });
+
+    // Update HUD telemetry
+    this.ui.updateHUD(this.avatar.position, this.avatar.orbitAngles.yaw);
+
+    // Render WebGL scene
+    this.renderer.render(this.scene, this.camera);
+  }
 }
-animate();
+
+// Launch application on DOM ready
+window.addEventListener('DOMContentLoaded', () => {
+  new PortfolioApp();
+});
