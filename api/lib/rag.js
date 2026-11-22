@@ -207,7 +207,7 @@ export async function generateRAGAnswer(question, chunks) {
   // 2. Try Gemini if configured
   if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim() !== '') {
     try {
-      const model = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+      const model = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`;
       const response = await fetch(url, {
         method: 'POST',
@@ -247,15 +247,15 @@ export async function generateRAGAnswer(question, chunks) {
     }
   }
 
-  // 3. Fallback when server credentials are not configured:
+  // 3. Fallback when no configured LLM provider returns a usable answer:
   // Return the verified context excerpts directly with transparent notice
   const bulletPoints = chunks.map(c => `• **${c.title}**:\n${c.content.split('\n').slice(0, 3).join('\n')}`).join('\n\n');
-  const fallbackAnswer = `*(Server LLM key not configured. Displaying verified portfolio excerpts retrieved by vector search)*:\n\n${bulletPoints}`;
+  const fallbackAnswer = `*(AI model unavailable. Displaying verified portfolio excerpts retrieved by vector search)*:\n\n${bulletPoints}`;
 
   return {
     answer: fallbackAnswer,
     sources,
     isGrounded: true,
-    provider: 'Local Vector Retrieval (No API key set)'
+    provider: 'Local Vector Retrieval (LLM unavailable)'
   };
 }

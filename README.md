@@ -49,7 +49,7 @@ Copy `.env.example` to `.env` for local use, or add variables in Vercel settings
 | `OPENAI_API_KEY` | Optional key for grounded ASTRA answer generation. |
 | `OPENAI_MODEL` | OpenAI model (default `gpt-4o-mini`). |
 | `GEMINI_API_KEY` | Optional alternative key for Gemini answer generation. |
-| `GEMINI_MODEL` | Gemini model (default `gemini-1.5-flash`). |
+| `GEMINI_MODEL` | Gemini model (default `gemini-3.8-flash`). |
 | `RATE_LIMIT_MAX_PER_MINUTE` | ASTRA requests allowed per IP per minute (default `15`). |
 | `MAX_QUERY_LENGTH` | Maximum ASTRA question length (default `500`). |
 | `PORT` | Local development server port (default `8000`). |
