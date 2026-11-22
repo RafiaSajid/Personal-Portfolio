@@ -4,7 +4,7 @@
   "description": "Interactive 3D space journey portfolio and RAG chatbot for Rafia Gull.",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
+    "start": "node local-server.js",
     "build:rag": "node scripts/build-rag-index.js",
     "build": "node scripts/build-rag-index.js"
   },
