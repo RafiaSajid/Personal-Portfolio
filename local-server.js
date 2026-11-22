@@ -2,7 +2,7 @@
  * Local Development Server
  * Serves static portfolio files and routes `/api/chat` and `/api/contact`
  *
- * Usage: node server.js
+ * Usage: npm start (or node local-server.js)
  */
 
 import http from 'http';

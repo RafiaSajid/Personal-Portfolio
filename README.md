@@ -1,6 +1,6 @@
 # Rafia Gull Portfolio
 
-Interactive Three.js portfolio with About and Projects pages, a procedural/GLB avatar, and the ASTRA portfolio question-answering assistant. It uses native HTML, CSS, and JavaScript modules. The `api/` directory contains Vercel serverless handlers for chat and contact; `server.js` provides a dependency-free local server for the same routes.
+Interactive Three.js portfolio with About and Projects pages, a procedural/GLB avatar, and the ASTRA portfolio question-answering assistant. It uses native HTML, CSS, and JavaScript modules. The `api/` directory contains Vercel serverless handlers for chat and contact; `local-server.js` provides a dependency-free local server for the same routes.
 
 ## Requirements
 
