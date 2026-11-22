@@ -376,6 +376,7 @@ export class SpaceScene {
     this.rimLight.color.setHex(theme.rimColor);
     this.rimLight.intensity = theme.rimIntensity;
 
+    if (theme.starColor !== undefined) this.starMaterial.color.setHex(theme.starColor);
     this.starMaterial.opacity = theme.starOpacity;
     this.themePathOpacity = theme.pathOpacity;
     this.pathClusters.forEach(({ points }) => points.material.color.setHex(theme.pathColor));

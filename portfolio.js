@@ -8,7 +8,7 @@ import { GroundedChat } from './src/chat/groundedChat.js';
 import { UIManager } from './src/ui/uiManager.js';
 
 const THEME_COLOR_KEYS = new Set([
-  'background', 'fog', 'ambientColor', 'sunColor', 'rimColor', 'pathColor', 'guideColor',
+  'background', 'fog', 'ambientColor', 'sunColor', 'rimColor', 'starColor', 'pathColor', 'guideColor',
   'platformColor', 'planetA', 'planetAHalo', 'planetB', 'planetBRing', 'planetC', 'asteroid'
 ]);
 

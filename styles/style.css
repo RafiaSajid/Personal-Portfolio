@@ -207,7 +207,7 @@ img { max-width: 100%; height: auto; }
   line-height: 1;
 }
 
-/* Compact draggable day/night switch with a miniature orbital motif. */
+/* Compact draggable glass day/night switch with its orbital motif. */
 .theme-toggle {
   position: relative;
   width: 78px;
@@ -291,6 +291,41 @@ html[data-theme="dark"] .theme-toggle .theme-thumb::before {
   box-shadow: 3px -2px 0 1px #536b98, 0 0 10px rgba(196,224,255,0.82);
 }
 .theme-toggle[style*="--theme-thumb-drag"] .theme-thumb { left: var(--theme-thumb-drag); transition: none; }
+
+/* A visible ink bloom spreads over the new palette, then dissolves away. */
+.theme-ink-reveal {
+  position: fixed;
+  z-index: 190;
+  width: 100vmax;
+  height: 100vmax;
+  border-radius: 48% 52% 42% 58% / 51% 43% 57% 49%;
+  background: var(--ink-color);
+  opacity: 0.96;
+  filter: blur(6px);
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.015) rotate(-8deg);
+  animation: theme-ink-bloom 1000ms cubic-bezier(.4,0,.65,.45) forwards;
+}
+.theme-ink-reveal::before, .theme-ink-reveal::after {
+  content: '';
+  position: absolute;
+  background: var(--ink-color);
+}
+.theme-ink-reveal::before {
+  width: 68%; height: 76%; left: -15%; top: 11%;
+  border-radius: 64% 36% 55% 45% / 45% 61% 39% 55%;
+  transform: rotate(-22deg);
+}
+.theme-ink-reveal::after {
+  width: 66%; height: 72%; right: -13%; bottom: 2%;
+  border-radius: 43% 57% 38% 62% / 62% 43% 57% 38%;
+  transform: rotate(24deg);
+}
+@keyframes theme-ink-bloom {
+  45% { border-radius: 38% 62% 56% 44% / 62% 43% 57% 38%; }
+  78% { opacity: 0.96; border-radius: 57% 43% 38% 62% / 43% 58% 42% 57%; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(2.4) rotate(8deg); border-radius: 49% 51% 55% 45% / 56% 44% 56% 44%; }
+}
 
 /* Mobile nav panel */
 #nav-mobile {
@@ -928,6 +963,64 @@ html[data-theme="dark"] .theme-toggle .theme-thumb::before {
 }
 @media (max-width: 600px) { .about-grid { grid-template-columns: 1fr; } }
 
+/* Contact form fields follow the shared theme and stay within narrow screens. */
+.contact-card-container {
+  width: 100%;
+  max-width: 760px;
+  padding: 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.cyber-contact-form { display: grid; gap: 1rem; width: 100%; }
+.form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.form-field { display: grid; gap: 0.4rem; min-width: 0; }
+.form-field label { color: var(--text-muted); font-size: 0.76rem; font-weight: 700; letter-spacing: 0.045em; }
+.form-field .required { color: var(--amber); }
+.form-field input, .form-field textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--surface-border);
+  border-radius: 7px;
+  padding: 0.7rem 0.8rem;
+  background: var(--input-bg);
+  color: var(--text);
+  font: inherit;
+  line-height: 1.45;
+  transition: border-color var(--transition), box-shadow var(--transition), background-color var(--transition);
+}
+.form-field input::placeholder, .form-field textarea::placeholder { color: var(--text-dim); opacity: 1; }
+.form-field input:focus, .form-field textarea:focus {
+  outline: none;
+  border-color: var(--border-hi);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cyan) 18%, transparent);
+}
+.form-field textarea { min-height: 140px; resize: vertical; }
+.form-field .input-error { border-color: var(--error-text); }
+.field-error-text { color: var(--error-text); font-size: 0.78rem; }
+.field-hint { color: var(--text-dim); font-size: 0.76rem; line-height: 1.5; }
+.contact-submit-btn {
+  justify-self: start;
+  border: 1px solid var(--border-hi);
+  border-radius: 6px;
+  padding: 0.7rem 1rem;
+  background: var(--cyan);
+  color: var(--text-on-accent);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: filter var(--transition), transform var(--transition);
+}
+.contact-submit-btn:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+.contact-submit-btn:disabled { cursor: wait; opacity: 0.7; }
+.contact-feedback-banner { margin: 0 0 1rem; padding: 0.8rem 1rem; border: 1px solid var(--surface-border); border-radius: 7px; color: var(--text); line-height: 1.5; }
+.contact-feedback-banner.success { border-color: var(--emerald); background: color-mix(in srgb, var(--emerald) 10%, var(--bg-card)); }
+.contact-feedback-banner.error { border-color: var(--error-text); background: color-mix(in srgb, var(--error-text) 8%, var(--bg-card)); }
+.contact-feedback-banner.info { border-color: var(--border-hi); background: var(--surface-raised); }
+@media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+
 .info-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -1238,6 +1331,7 @@ button:focus-visible, a:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
   .loading-ring { animation: none; border-color: var(--cyan); }
+  .theme-ink-reveal { display: none; }
 }
 
 /* ── Utility ────────────────────────────────────────────────────────────── */

@@ -22,7 +22,7 @@
         background: 0x020510, fog: 0x020510, fogDensity: 0.005,
         ambientColor: 0x0e1428, ambientIntensity: 1.6,
         sunColor: 0xdbeafe, sunIntensity: 2.0, rimColor: 0x7c3aed, rimIntensity: 1.2,
-        starOpacity: 0.88, pathColor: 0x38bdf8, pathOpacity: 0.85, guideColor: 0x0284c7, guideOpacity: 0.35,
+        starColor: 0xffffff, starOpacity: 0.88, pathColor: 0x38bdf8, pathOpacity: 0.85, guideColor: 0x0284c7, guideOpacity: 0.35,
         platformColor: 0x090e1f, platformRoughness: 0.6, platformMetalness: 0.4,
         planetA: 0x312e81, planetAHalo: 0xa855f7, planetB: 0x164e63, planetBRing: 0x38bdf8,
         planetC: 0x1e1b4b, asteroid: 0x334155, nebula: [0x312e81, 0x0c4a6e], nebulaOpacity: 0.045,
@@ -38,18 +38,18 @@
         '--cyan': '#0369a1', '--cyan-glow': '#0891b2', '--violet': '#7c3aed', '--violet-dark': '#6d28d9',
         '--emerald': '#047857', '--amber': '#a85208', '--blue': '#0369a1',
         '--text': '#172b41', '--text-muted': '#3b536d', '--text-dim': '#5d7188', '--text-strong': '#10243a',
-        '--scene-text': '#ffffff', '--scene-muted': '#edf5ff', '--error-text': '#b42318',
-        '--scene-accent': '#b6ecff', '--scene-button-text': '#10243a',
+        '--scene-text': '#10243a', '--scene-muted': '#203a55', '--error-text': '#b42318',
+        '--scene-accent': '#063b59', '--scene-button-text': '#ffffff',
         '--text-on-accent': '#ffffff', '--surface': 'rgba(17, 61, 98, 0.045)',
         '--surface-raised': 'rgba(17, 61, 98, 0.075)', '--surface-border': 'rgba(17, 61, 98, 0.15)',
         '--input-bg': 'rgba(255,255,255,0.92)', '--page-backdrop': 'rgba(21, 41, 65, 0.34)',
         '--shadow-glow': '0 0 24px rgba(3,105,161,0.15)'
       },
       three: {
-        background: 0x637f9d, fog: 0x637f9d, fogDensity: 0.0034,
+        background: 0x8da5be, fog: 0x8da5be, fogDensity: 0.0034,
         ambientColor: 0xc5d9ef, ambientIntensity: 1.85,
         sunColor: 0xffffff, sunIntensity: 2.25, rimColor: 0x7755bc, rimIntensity: 1.15,
-        starOpacity: 0.98, pathColor: 0x075985, pathOpacity: 0.9, guideColor: 0x1d4ed8, guideOpacity: 0.58,
+        starColor: 0x233e56, starOpacity: 0.98, pathColor: 0x063b59, pathOpacity: 0.9, guideColor: 0x063b59, guideOpacity: 0.58,
         platformColor: 0xcbd8e7, platformRoughness: 0.7, platformMetalness: 0.16,
         planetA: 0x5b55a5, planetAHalo: 0x9b70d2, planetB: 0x237b91, planetBRing: 0x075985,
         planetC: 0x58548c, asteroid: 0x71849a, nebula: [0x9d8cc4, 0x76a8c0], nebulaOpacity: 0.1,
@@ -63,10 +63,10 @@
   let storedTheme = null;
   try { storedTheme = localStorage.getItem(STORAGE_KEY); } catch (_) { /* Storage can be blocked. */ }
   const systemPrefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? true;
-  let currentTheme = THEMES[storedTheme] ? storedTheme : (systemPrefersDark ? 'dark' : 'light');
+  const initialTheme = THEMES[storedTheme] ? storedTheme : (systemPrefersDark ? 'dark' : 'light');
+  let currentTheme = null;
 
-  function apply(theme, persist) {
-    if (!THEMES[theme]) return;
+  function updateTheme(theme, persist) {
     currentTheme = theme;
     root.dataset.theme = theme;
     root.style.colorScheme = theme;
@@ -76,6 +76,28 @@
     }
     syncControls(persist);
     listeners.forEach((listener) => listener(theme, THEMES[theme]));
+  }
+
+  function playInkReveal(previousTheme, origin) {
+    if (!document.body) return;
+    document.querySelectorAll('.theme-ink-reveal').forEach((reveal) => reveal.remove());
+    const reveal = document.createElement('span');
+    reveal.className = 'theme-ink-reveal';
+    reveal.setAttribute('aria-hidden', 'true');
+    reveal.style.left = `${origin?.x ?? window.innerWidth / 2}px`;
+    reveal.style.top = `${origin?.y ?? window.innerHeight / 2}px`;
+    reveal.style.setProperty('--ink-color', THEMES[previousTheme].css['--page-bg']);
+    reveal.addEventListener('animationend', () => reveal.remove(), { once: true });
+    document.body.appendChild(reveal);
+  }
+
+  function apply(theme, persist, origin = null) {
+    if (!THEMES[theme] || currentTheme === theme) return;
+
+    const previousTheme = currentTheme;
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    updateTheme(theme, persist);
+    if (previousTheme !== null && !reduceMotion) playInkReveal(previousTheme, origin);
   }
 
   function syncControls(announce) {
@@ -120,21 +142,32 @@
         button.style.removeProperty('--theme-thumb-drag');
         if (completed.moved && !cancelled) {
           suppressClick = true;
-          apply(completed.position >= (completed.minPosition + completed.maxPosition) / 2 ? 'dark' : 'light', true);
+          apply(completed.position >= (completed.minPosition + completed.maxPosition) / 2 ? 'dark' : 'light', true, {
+            x: event.clientX,
+            y: event.clientY
+          });
         }
         try { if (button.hasPointerCapture(event.pointerId)) button.releasePointerCapture(event.pointerId); } catch (_) { /* No capture. */ }
       };
 
       button.addEventListener('pointerup', (event) => finishDrag(event));
       button.addEventListener('pointercancel', (event) => finishDrag(event, true));
-      button.addEventListener('click', () => {
+      button.addEventListener('click', (event) => {
         if (suppressClick) { suppressClick = false; return; }
-        apply(currentTheme === 'dark' ? 'light' : 'dark', true);
+        const bounds = button.getBoundingClientRect();
+        apply(currentTheme === 'dark' ? 'light' : 'dark', true, {
+          x: event.clientX || bounds.left + bounds.width / 2,
+          y: event.clientY || bounds.top + bounds.height / 2
+        });
       });
       button.addEventListener('keydown', (event) => {
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
           event.preventDefault();
-          apply(event.key === 'ArrowRight' ? 'dark' : 'light', true);
+          const bounds = button.getBoundingClientRect();
+          apply(event.key === 'ArrowRight' ? 'dark' : 'light', true, {
+            x: bounds.left + bounds.width / 2,
+            y: bounds.top + bounds.height / 2
+          });
         }
       });
     });
@@ -153,7 +186,7 @@
     attachControls
   };
 
-  apply(currentTheme, false);
+  apply(initialTheme, false);
   window.portfolioTheme = manager;
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', attachControls, { once: true });
   else attachControls();
