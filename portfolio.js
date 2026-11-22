@@ -9,15 +9,43 @@ import { UIManager } from './src/ui/uiManager.js';
 
 class PortfolioApp {
   constructor() {
-    this.container = document.getElementById('canvas-container') || document.body;
+    this.container = document.getElementById('canvas-wrap') || document.body;
     this.clock = new THREE.Clock();
+
+    // Verify WebGL availability
+    if (!this.checkWebGL()) {
+      this.handleWebGLUnavailable();
+      return;
+    }
 
     this.initRenderer();
     this.initScene();
     this.initModules();
+    this.initRaycasting();
     this.initEvents();
 
+    // Remove loading screen when ready
+    setTimeout(() => {
+      this.ui.setLoading(false);
+    }, 450);
+
     this.animate();
+  }
+
+  checkWebGL() {
+    try {
+      const canvas = document.createElement('canvas');
+      return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  handleWebGLUnavailable() {
+    const fallback = document.getElementById('webgl-fallback');
+    if (fallback) fallback.classList.add('visible');
+    const loading = document.getElementById('loading-screen');
+    if (loading) loading.classList.add('hidden');
   }
 
   initRenderer() {
@@ -26,7 +54,8 @@ class PortfolioApp {
       powerPreference: 'high-performance'
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Limit pixel ratio to max 2 for GPU efficiency
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -35,50 +64,74 @@ class PortfolioApp {
 
   initScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x060814);
-    this.scene.fog = new THREE.FogExp2(0x060814, 0.005);
+    this.scene.background = new THREE.Color(0x020510);
+    this.scene.fog = new THREE.FogExp2(0x020510, 0.005);
 
-    // Third-person perspective camera
+    // Third-person perspective camera looking down the star path
     this.camera = new THREE.PerspectiveCamera(
       65,
       window.innerWidth / window.innerHeight,
       0.1,
-      800
+      600
     );
   }
 
   initModules() {
-    // 1. Synthesized Audio Engine
+    // 1. Procedural Web Audio Engine
     this.audio = new AudioManager();
 
-    // 2. Space Environment & Procedural Starfield
+    // 2. Space Environment & Star Path
     this.spaceScene = new SpaceScene(this.scene);
 
-    // 3. Third-Person Character & Camera Rig
+    // 3. Avatar Controller (procedural / custom GLTF)
     this.avatar = new AvatarController(this.scene, this.camera, this.renderer.domElement);
 
-    // 4. Grounded AI Chat Companion
+    // 4. Grounded AI Chat Assistant (ASTRA)
     this.chat = new GroundedChat();
 
-    // 5. Input Manager
-    this.input = new InputManager(this.renderer.domElement, () => {
-      this.ui.handleInteractAction();
+    // 5. Input Manager (WASD, Arrows, touch D-Pad, mouse drag)
+    this.input = new InputManager(this.renderer.domElement, {
+      onInteract: () => this.ui.handleInteract(),
+      onCameraRotate: (deltaYaw, deltaPitch) => this.avatar.rotateCamera(deltaYaw, deltaPitch),
+      onCameraZoom: (deltaZoom) => this.avatar.zoomCamera(deltaZoom)
     });
 
-    // Connect camera controls to Input Manager
-    this.input.onCameraRotate = (deltaYaw, deltaPitch) => {
-      this.avatar.rotateCamera(deltaYaw, deltaPitch);
-    };
-
-    this.input.onCameraZoom = (deltaZoom) => {
-      this.avatar.zoom(deltaZoom);
-    };
-
-    // 6. Interactive 3D Sector Landmarks
+    // 6. Interactive 3D Star Landmarks
     this.landmarks = new LandmarkManager(this.scene);
 
-    // 7. HUD & Modal UI Manager
+    // 7. HUD & Navigation UI Manager
     this.ui = new UIManager(this.avatar, this.audio, this.chat);
+  }
+
+  initRaycasting() {
+    this.raycaster = new THREE.Raycaster();
+    this.mouse = new THREE.Vector2();
+
+    // Click on 3D landmarks directly with mouse/pointer
+    this.renderer.domElement.addEventListener('click', (e) => {
+      // Don't trigger click if user was dragging camera
+      if (this.input.isDraggingCamera) return;
+
+      this.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      this.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+      this.raycaster.setFromCamera(this.mouse, this.camera);
+      const targets = this.landmarks.getRaycastTargets();
+      const intersects = this.raycaster.intersectObjects(targets, true);
+
+      if (intersects.length > 0) {
+        // Find ancestor with landmark data
+        let obj = intersects[0].object;
+        while (obj && !obj.userData?.landmark) {
+          obj = obj.parent;
+        }
+
+        if (obj && obj.userData?.landmark) {
+          const landmarkData = obj.userData.landmark.data;
+          this.ui.navigateToSection(landmarkData.id);
+        }
+      }
+    });
   }
 
   initEvents() {
@@ -88,7 +141,7 @@ class PortfolioApp {
       this.camera.aspect = w / h;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(w, h);
-      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     });
   }
 
@@ -97,26 +150,26 @@ class PortfolioApp {
 
     const delta = Math.min(this.clock.getDelta(), 0.1);
 
-    // Update player locomotion & camera
+    // 1. Update avatar locomotion and third-person camera
     this.avatar.update(delta, this.input);
 
-    // Update space environment features
-    this.spaceScene.update(delta);
+    // 2. Update space environment & star path reveal ahead of player
+    this.spaceScene.update(delta, this.avatar.position);
 
-    // Update landmarks animation & check proximity to avatar
-    this.landmarks.update(delta, this.avatar.position, (nearbyLandmark) => {
-      this.ui.onProximityChanged(nearbyLandmark);
+    // 3. Update landmarks and check proximity to avatar
+    this.landmarks.update(delta, this.avatar.position, (nearby) => {
+      this.ui.onProximityChanged(nearby);
     });
 
-    // Update HUD telemetry
+    // 4. Update HUD coordinates
     this.ui.updateHUD(this.avatar.position, this.avatar.orbitAngles.yaw);
 
-    // Render WebGL scene
+    // 5. Render Three.js scene
     this.renderer.render(this.scene, this.camera);
   }
 }
 
-// Launch application on DOM ready
+// Boot application when DOM is ready
 window.addEventListener('DOMContentLoaded', () => {
   new PortfolioApp();
 });

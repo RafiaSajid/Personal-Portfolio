@@ -1,124 +1,89 @@
-# Rafia Gull - 3D Interactive Space Journey Portfolio
+# Rafia Gull Portfolio
 
-A real-time, third-person 3D space journey portfolio built for **Rafia Gull**, an aspiring game developer and Computer Science student specializing in **Gaming and Animation**.
+Interactive Three.js portfolio with About and Projects pages, a procedural/GLB avatar, and the ASTRA portfolio question-answering assistant. It uses native HTML, CSS, and JavaScript modules. The `api/` directory contains Vercel serverless handlers for chat and contact; `server.js` provides a dependency-free local server for the same routes.
 
-Built using **HTML5, CSS3, JavaScript (ES6+), and Three.js** with zero heavyweight frameworks, optimized for instant loading and static deployment on **Vercel**.
+## Requirements
 
----
+- Node.js 20 or newer
+- npm
+- A modern browser with WebGL for the 3D scene (the About and Projects pages remain usable without WebGL)
 
-## 🚀 Features
+## Install and run locally
 
-- **Real-Time 3D Space Experience**: Explore deep space with dynamic starfields, planetary rings, cosmic dust, and orbital platforms.
-- **Third-Person Character Controller**:
-  - Smooth WASD / Arrow directional movement relative to the camera heading.
-  - Orbit camera with mouse drag and zoom wheel.
-  - Jetpack hover (`Space`) and thruster boost / sprint (`Shift`).
-  - Mobile & tablet virtual touch joystick and touch swipe camera rotation.
-  - Procedural space explorer avatar with walking and hover locomotion.
-  - Drop-in support for custom GLTF/GLB avatar models with idle/walk animations.
-- **Interactive Orbital Sector Landmarks**:
-  - **Arrival Platform**: Starting coordinates and navigational beacon.
-  - **Command Hub (About Me)**: Bio, degree focus, specialization in Gaming and Animation, and mission statement.
-  - **The Orbital Hangar (Projects)**: Filterable project showcase, technology tags, technical details, and link buttons.
-  - **Cyber Laboratory (Skills Matrix)**: Tech competencies in C++, C#, Unity, Unreal, Three.js, 3D math, and animation pipelines.
-  - **Deep Space Relay (Contact)**: Direct transmission dispatch form, email copy, and social links.
-  - **HUD Quick-Warp**: Instant teleportation to any sector with one click.
-- **Grounded AI Companion ("ASTRA")**:
-  - Sci-fi companion droid grounded strictly on verified portfolio data.
-  - Answers questions about Rafia's game dev background, tech stack, and projects without hallucinating.
-  - Suggested question chips for instant interaction.
-- **Synthesized Web Audio**:
-  - Atmospheric synth drone and UI interaction chimes generated via the Web Audio API without external audio file dependencies.
-  - Muted by default with a one-click audio toggle.
-
----
-
-## 🛠️ How to Run Locally
-
-Because the project uses standard ES modules with Three.js import maps, run a lightweight local static server:
-
-### Option 1: Python (Built-in)
-```bash
-# In the project directory:
-python -m http.server 8000
-```
-Then open [http://localhost:8000](http://localhost:8000) in your browser.
-
-### Option 2: Node.js / npx
-```bash
-npx serve .
+```sh
+npm install
+cp .env.example .env
+npm start
 ```
 
-### Option 3: VS Code
-Open the repository in VS Code and click **"Go Live"** using the **Live Server** extension.
+On Windows PowerShell, copy the example with `Copy-Item .env.example .env`. Edit `.env` to add credentials and your confirmed contact recipient. The local server reads `.env`; environment variables already set in the shell take precedence. Open `http://localhost:8000`. Direct page routes work at `/`, `/about` (or `/about.html`), and `/projects` (or `/projects.html`). The form is at `/about#contact-section`.
 
----
+No third-party package installation is needed by the app itself. `npm install` is harmless when there are no dependencies and creates the usual local npm metadata.
 
-## 🌐 Deploying to Vercel
+## Build and deploy on Vercel
 
-The project includes a ready-to-use `vercel.json` and uses zero build steps:
-1. Push your repository to GitHub.
-2. Go to [Vercel](https://vercel.com) and click **"Add New Project"**.
-3. Select your repository `Personal-Portfolio`.
-4. Leave Build & Output settings as default (static site) and click **Deploy**.
+The Vercel project uses the repository root. The build command is `npm run build`, which rebuilds `api/data/knowledgeBase.json` from the structured portfolio data. Vercel serves the root HTML files as static pages, recognizes `api/chat.js` and `api/contact.js` as serverless functions, and `cleanUrls` allows both extensionless and `.html` page URLs. No custom API rewrite is needed.
 
----
+1. Push the repository to GitHub and import it in Vercel.
+2. Keep the root directory as `.` and set the build command to `npm run build`. There is no separate output directory to configure.
+3. Add the server-side environment variables listed below in Vercel Project Settings for each intended environment.
+4. Deploy, then open `/`, `/about`, `/projects`, and submit a contact form after configuring a real recipient and provider.
 
-## 🎮 How to Customize Content
+The committed `assets/Portfolio.glb` is about 1.8 MB and is served as a static asset, which is within Vercel's static asset limits. Add project images and videos under `assets/` and reference them with relative paths in the data. Keep large media reasonably compressed; use an external video host for large/streaming videos rather than committing very large video files to Git. There are currently no video files in the repository.
 
-### 1. Updating Projects, Skills, and Contact Info
-All content is centralized in [`src/data/portfolioData.js`](file:///d:/Github/Personal-Portfolio/src/data/portfolioData.js):
-- Add new game projects to `portfolioData.projects`.
-- Add or edit skills in `portfolioData.skills`.
-- Update your actual email, GitHub URL, and LinkedIn URL in `portfolioData.profile.contact`.
+The main page detects WebGL support and shows a fallback with links to the About and Projects pages if WebGL is unavailable. The 3D scene cannot render in that case, but the content pages do not depend on WebGL.
 
-### 2. Adding Your Custom 3D Avatar
-When your custom 3D avatar (.glb or .gltf) with idle and walk animations is ready:
-1. Place your model file in `assets/avatar.glb`.
-2. Open [`src/character/avatarConfig.js`](file:///d:/Github/Personal-Portfolio/src/character/avatarConfig.js).
-3. Set:
-   ```javascript
-   export const avatarConfig = {
-     modelPath: './assets/avatar.glb', // path to your GLTF file
-     scale: 1.0,
-     positionOffset: [0, 0, 0],
-     rotationOffset: [0, Math.PI, 0],
-     animations: {
-       idleClipName: 'idle', // your animation clip name
-       walkClipName: 'walk', // your animation clip name
-       runClipName: 'run',
-     }
-   };
-   ```
-The engine will automatically load your model and fade between your custom animations based on movement speed.
+## Environment variables
 
----
+Copy `.env.example` to `.env` for local use, or add variables in Vercel settings. Never commit `.env` or real credentials. The repository ignores `.env*` files while allowing the placeholder-only `.env.example`.
 
-## 📂 Project Architecture
+| Variable | Purpose |
+| --- | --- |
+| `CONTACT_RECIPIENT_EMAIL` | Confirmed destination for contact submissions. `abc@gmail.com` is a placeholder and the API rejects it. |
+| `RESEND_API_KEY` | Resend server-side API key (recommended provider). |
+| `RESEND_FROM_EMAIL` | Sender identity accepted by Resend; use a verified domain in production. |
+| `SENDGRID_API_KEY` | Optional SendGrid server-side API key. |
+| `SENDGRID_FROM_EMAIL` | Optional verified SendGrid sender address. |
+| `CONTACT_WEBHOOK_URL` | Optional server-side contact delivery webhook, used after email providers if configured. |
+| `CONTACT_RATE_LIMIT` | Contact requests allowed per IP per 10 minutes (default `5`). |
+| `OPENAI_API_KEY` | Optional key for grounded ASTRA answer generation. |
+| `OPENAI_MODEL` | OpenAI model (default `gpt-4o-mini`). |
+| `GEMINI_API_KEY` | Optional alternative key for Gemini answer generation. |
+| `GEMINI_MODEL` | Gemini model (default `gemini-1.5-flash`). |
+| `RATE_LIMIT_MAX_PER_MINUTE` | ASTRA requests allowed per IP per minute (default `15`). |
+| `MAX_QUERY_LENGTH` | Maximum ASTRA question length (default `500`). |
+| `PORT` | Local development server port (default `8000`). |
 
+Example values are in `.env.example`; replace placeholders before expecting external service behavior. Contact submissions are not reported as delivered unless a configured provider accepts them. Without a confirmed recipient and working provider, the endpoint returns a configuration or delivery error and the browser preserves the entered fields. The IP rate limiter uses in-memory state, so on Vercel it is best-effort per warm function instance rather than a shared, durable limit.
+
+ASTRA always retrieves from the generated portfolio index. With a configured OpenAI or Gemini key it can generate a grounded answer from retrieved records. Without an LLM key, it returns the retrieved portfolio excerpts; that fallback is not a generated answer. No live deployment or external provider configuration is included in this repository.
+
+## Configure the GLB avatar
+
+The project currently points to `./assets/Portfolio.glb` in `src/character/avatarConfig.js`. To use another model, place the `.glb` or `.gltf` file under `assets/`, set `modelPath` to its relative URL, and update `scale`, `positionOffset`, and `rotationOffset` for the model's units and facing direction. Set `modelPath: null` to use the procedural explorer.
+
+Set `animationNames.idle` and `animationNames.walk` to the exact names of the corresponding clips embedded in the model. The current names are `Idle` and `_walk`; update them if the replacement model uses different names. If a model fails to load, the controller falls back to the procedural avatar.
+
+## Add a project and media
+
+Add a record to the `projects` array in `src/data/portfolioData.js`. Use a unique URL-safe `id`, then provide the title, category, technologies, summary, and details. Set `thumbnail` and `videoUrl` to relative asset URLs (or a suitable hosted URL); set either to `null` when no media exists. The Projects catalog and RAG source content are generated from this structured data. Keep links accurate and only add media you have permission to publish.
+
+After changing profile, education, skills, certifications, or projects, refresh the chatbot index:
+
+```sh
+npm run build:rag
 ```
-Personal-Portfolio/
-├── index.html                 # Main HTML entry point & HUD UI elements
-├── portfolio.js               # Application coordinator & Three.js render loop
-├── vercel.json                # Vercel deployment configuration
-├── styles/
-│   └── style.css              # Glassmorphism sci-fi HUD & modal styling
-├── src/
-│   ├── data/
-│   │   └── portfolioData.js   # Centralized data-driven projects & profile
-│   ├── character/
-│   │   ├── avatarConfig.js    # Avatar drop-in configuration for custom GLTF
-│   │   └── avatarController.js# Character locomotion & third-person camera rig
-│   ├── scene/
-│   │   ├── spaceScene.js      # Starfield, lighting, distant planet, cosmic dust
-│   │   └── landmarks.js       # 3D interactive stations & holographic banners
-│   ├── controls/
-│   │   └── inputManager.js    # WASD, camera drag, touch joystick
-│   ├── ui/
-│   │   └── uiManager.js       # Modals, HUD telemetry, and warp navigation
-│   ├── chat/
-│   │   └── groundedChat.js    # Grounded AI assistant (ASTRA)
-│   └── audio/
-│       └── audioManager.js    # Web Audio API procedural sound synthesizer
-└── README.md
-```
+
+This writes `api/data/knowledgeBase.json`; `npm run build` runs the same script for Vercel deployments. Review generated content before deploying, especially if you add private or unverified information. A valid provider key is required for LLM-generated answers; the local retrieval fallback can be used without one.
+
+## Configure contact delivery
+
+The form is on the About page and posts to `/api/contact`. The browser and server validate name (2-100 characters), email (valid format, up to 150 characters), subject (2-150 characters), and message (10-3,000 characters). A hidden honeypot catches simple bots and the endpoint applies an in-memory per-IP limit.
+
+To enable real delivery:
+
+1. Confirm the actual recipient address and set `CONTACT_RECIPIENT_EMAIL` in `.env` or Vercel settings. The placeholder `abc@gmail.com` is deliberately refused.
+2. Configure either `RESEND_API_KEY` and a permitted `RESEND_FROM_EMAIL`, or `SENDGRID_API_KEY` and a verified `SENDGRID_FROM_EMAIL`. A server-side `CONTACT_WEBHOOK_URL` is also supported.
+3. Submit a real test after deployment and confirm receipt at the destination. A successful HTTP response from a provider is the only success condition shown by the form.
+
+Credentials are read only by the server handlers. The application does not log API keys or message bodies. Provider setup, recipient confirmation, and delivery have not been completed or verified by this repository change.

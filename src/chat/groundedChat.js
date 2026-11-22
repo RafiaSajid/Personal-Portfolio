@@ -2,36 +2,36 @@ import { portfolioData } from '../data/portfolioData.js';
 
 export class GroundedChat {
   constructor() {
-    this.history = [];
     this.isOpen = false;
+    this.isLoading = false;
+    this.lastQuery = null;
 
-    // Chat DOM elements
-    this.chatWidget = document.getElementById('chat-widget');
-    this.chatToggleBtn = document.getElementById('chat-toggle-btn');
-    this.chatCloseBtn = document.getElementById('chat-close-btn');
-    this.chatMessagesContainer = document.getElementById('chat-messages');
-    this.chatInput = document.getElementById('chat-input');
-    this.chatSendBtn = document.getElementById('chat-send-btn');
-    this.chatSuggestions = document.getElementById('chat-suggestions');
+    // DOM Elements
+    this.panel = document.getElementById('chat-panel');
+    this.toggleBtn = document.getElementById('chat-toggle');
+    this.closeBtn = document.getElementById('chat-close');
+    this.messagesContainer = document.getElementById('chat-messages');
+    this.input = document.getElementById('chat-input');
+    this.sendBtn = document.getElementById('chat-send');
+    this.suggestionsContainer = document.getElementById('chat-suggestions');
 
     this.init();
   }
 
   init() {
-    if (!this.chatWidget) return;
+    if (!this.panel) return;
 
-    // Event listeners
-    if (this.chatToggleBtn) {
-      this.chatToggleBtn.addEventListener('click', () => this.toggle());
+    if (this.toggleBtn) {
+      this.toggleBtn.addEventListener('click', () => this.toggle());
     }
 
-    if (this.chatCloseBtn) {
-      this.chatCloseBtn.addEventListener('click', () => this.close());
+    if (this.closeBtn) {
+      this.closeBtn.addEventListener('click', () => this.close());
     }
 
-    if (this.chatSendBtn && this.chatInput) {
-      this.chatSendBtn.addEventListener('click', () => this.handleSendMessage());
-      this.chatInput.addEventListener('keydown', (e) => {
+    if (this.sendBtn && this.input) {
+      this.sendBtn.addEventListener('click', () => this.handleSendMessage());
+      this.input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
           this.handleSendMessage();
@@ -39,209 +39,287 @@ export class GroundedChat {
       });
     }
 
-    // Suggestions setup
+    if (this.input) {
+      this.input.addEventListener('keydown', (e) => e.stopPropagation());
+      this.input.addEventListener('keyup', (e) => e.stopPropagation());
+    }
+
     this.setupSuggestions([
-      "What is Rafia's specialization?",
-      "Tell me about the 3D Space Journey",
-      "Which game engines does Rafia know?",
-      "How do I contact Rafia?",
-      "Show me Rafia's projects"
+      "What did Rafia build for the VR Games Hub?",
+      "Tell me about Eat Right Run in Unreal Engine",
+      "Which certifications does Rafia hold?",
+      "What did Rafia contribute to The Parallel Eclipse?",
+      "What are Rafia's programming language skills?"
     ]);
 
-    // Initial greeting
-    this.addBotMessage(
-      `Hello, Explorer! I am **ASTRA**, Rafia's navigational AI companion. Feel free to ask me anything about Rafia's game development projects, technical skills in gaming & animation, or how to get in touch!`
-    );
+    // Initial welcome message explaining RAG scope
+    this.addBotMessage({
+      answer: `Hello! I am **ASTRA**, Rafia Gull's grounded AI portfolio companion.\n\n` +
+        `I use real-time **Retrieval-Augmented Generation (RAG)** grounded strictly on verified information from Rafia's resume.\n\n` +
+        `You can ask me about:\n` +
+        `• **7 Featured Projects** (*VR Games Hub, Eat Right Run, The Parallel Eclipse, Study Buddy, Study Planner, Cherrysweeper, Tic Tac Toe*)\n` +
+        `• **Academic Background** (*NED University, Gaming and Animation specialization*)\n` +
+        `• **CEGA Certifications** (*Unreal Course & Pre-Production Course*)\n` +
+        `• **Technical Skills** (*Unity, Unreal Engine, C++, C#, Python, Blender, MySQL*)\n\n` +
+        `*Every response includes citations pointing to the exact portfolio sources.*`,
+      sources: []
+    });
   }
 
   toggle() {
-    this.isOpen = !this.isOpen;
-    if (this.isOpen) {
-      this.chatWidget.classList.add('active');
-      if (this.chatInput) this.chatInput.focus();
-    } else {
-      this.chatWidget.classList.remove('active');
-    }
+    if (this.isOpen) this.close();
+    else this.open();
   }
 
   open() {
     this.isOpen = true;
-    if (this.chatWidget) {
-      this.chatWidget.classList.add('active');
-      if (this.chatInput) this.chatInput.focus();
+    this.panel?.classList.add('open');
+    if (this.toggleBtn) {
+      this.toggleBtn.setAttribute('aria-expanded', 'true');
+    }
+    if (this.input) {
+      setTimeout(() => this.input.focus(), 250);
     }
   }
 
   close() {
     this.isOpen = false;
-    if (this.chatWidget) {
-      this.chatWidget.classList.remove('active');
+    this.panel?.classList.remove('open');
+    if (this.toggleBtn) {
+      this.toggleBtn.setAttribute('aria-expanded', 'false');
     }
   }
 
   setupSuggestions(suggestions) {
-    if (!this.chatSuggestions) return;
-    this.chatSuggestions.innerHTML = '';
+    if (!this.suggestionsContainer) return;
+    this.suggestionsContainer.innerHTML = '';
     suggestions.forEach((text) => {
       const btn = document.createElement('button');
-      btn.className = 'chat-suggestion-chip';
+      btn.className = 'chat-chip';
       btn.textContent = text;
+      btn.setAttribute('aria-label', `Ask: ${text}`);
       btn.addEventListener('click', () => {
-        if (this.chatInput) {
-          this.chatInput.value = text;
+        if (this.input && !this.isLoading) {
+          this.input.value = text;
           this.handleSendMessage();
         }
       });
-      this.chatSuggestions.appendChild(btn);
+      this.suggestionsContainer.appendChild(btn);
     });
   }
 
-  handleSendMessage() {
-    const text = this.chatInput?.value.trim();
+  async handleSendMessage() {
+    if (this.isLoading) return;
+    const text = this.input?.value.trim();
     if (!text) return;
 
-    // Add user message
+    this.lastQuery = text;
     this.addUserMessage(text);
-    this.chatInput.value = '';
+    this.input.value = '';
 
-    // Show typing indicator
-    const typingElem = this.showTypingIndicator();
+    // Show loading state
+    this.isLoading = true;
+    if (this.sendBtn) this.sendBtn.disabled = true;
+    const loadingElem = this.showLoadingIndicator();
 
-    setTimeout(() => {
-      typingElem.remove();
-      const response = this.generateGroundedResponse(text);
-      this.addBotMessage(response);
-    }, 450);
+    try {
+      // Call Serverless RAG Endpoint (/api/chat)
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: text })
+      });
+
+      loadingElem.remove();
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || `Server responded with status ${res.status}`);
+      }
+
+      const data = await res.json();
+      this.addBotMessage(data);
+
+    } catch (err) {
+      loadingElem.remove();
+      console.warn('API call failed, attempting client-side fallback retrieval:', err.message);
+
+      // Attempt client-side grounded retrieval fallback if server is offline
+      const clientFallback = this.clientSideRetrieve(text);
+      if (clientFallback) {
+        this.addBotMessage(clientFallback);
+      } else {
+        this.showErrorMessage(err.message || 'Unable to connect to RAG server.');
+      }
+    } finally {
+      this.isLoading = false;
+      if (this.sendBtn) this.sendBtn.disabled = false;
+    }
   }
 
   addUserMessage(text) {
     const msg = document.createElement('div');
-    msg.className = 'chat-msg user-msg';
+    msg.className = 'msg user';
     msg.textContent = text;
-    this.chatMessagesContainer?.appendChild(msg);
+    this.messagesContainer?.appendChild(msg);
     this.scrollToBottom();
   }
 
-  addBotMessage(markdownText) {
+  addBotMessage({ answer, sources = [] }) {
     const msg = document.createElement('div');
-    msg.className = 'chat-msg bot-msg';
-    msg.innerHTML = this.formatMarkdown(markdownText);
-    this.chatMessagesContainer?.appendChild(msg);
+    msg.className = 'msg bot';
+
+    let html = `<div class="msg-content">${this.formatMarkdown(answer)}</div>`;
+
+    // Render clickable source citations if provided
+    if (sources && sources.length > 0) {
+      html += `
+        <div class="msg-sources" aria-label="Referenced Sources">
+          <span class="sources-title">Verified Sources:</span>
+          <div class="sources-list">
+            ${sources.map(s => `
+              <a href="${s.link || '#'}" class="source-pill" title="View details in ${s.title}" target="${s.link?.startsWith('http') ? '_blank' : '_self'}">
+                <span class="source-icon">✦</span> ${this.escapeHTML(s.title)}
+              </a>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    msg.innerHTML = html;
+    this.messagesContainer?.appendChild(msg);
     this.scrollToBottom();
   }
 
-  showTypingIndicator() {
-    const typing = document.createElement('div');
-    typing.className = 'chat-msg bot-msg typing-indicator';
-    typing.innerHTML = '<span>.</span><span>.</span><span>.</span>';
-    this.chatMessagesContainer?.appendChild(typing);
+  showLoadingIndicator() {
+    const loading = document.createElement('div');
+    loading.className = 'msg bot loading-state';
+    loading.setAttribute('aria-live', 'assertive');
+    loading.innerHTML = `
+      <div class="loading-dots">
+        <span>•</span><span>•</span><span>•</span>
+      </div>
+      <span class="loading-label">Searching vector index & grounding response...</span>
+    `;
+    this.messagesContainer?.appendChild(loading);
     this.scrollToBottom();
-    return typing;
+    return loading;
+  }
+
+  showErrorMessage(errorText) {
+    const errContainer = document.createElement('div');
+    errContainer.className = 'msg bot error-state';
+    errContainer.innerHTML = `
+      <div style="color:#ef4444; font-weight:700; margin-bottom:0.3rem;">⚠️ Transmission Error</div>
+      <p style="font-size:0.8rem; color:#cbd5e1;">${this.escapeHTML(errorText)}</p>
+      <button class="chat-retry-btn" aria-label="Retry query">Retry Question</button>
+    `;
+
+    errContainer.querySelector('.chat-retry-btn')?.addEventListener('click', () => {
+      errContainer.remove();
+      if (this.lastQuery && this.input) {
+        this.input.value = this.lastQuery;
+        this.handleSendMessage();
+      }
+    });
+
+    this.messagesContainer?.appendChild(errContainer);
+    this.scrollToBottom();
   }
 
   scrollToBottom() {
-    if (this.chatMessagesContainer) {
-      this.chatMessagesContainer.scrollTop = this.chatMessagesContainer.scrollHeight;
+    if (this.messagesContainer) {
+      this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
     }
   }
 
   formatMarkdown(text) {
-    // Lightweight markdown parser for bold, links, lists, code
-    let html = text
+    if (!text) return '';
+    return text
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/`(.*?)`/g, '<code>$1</code>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
       .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
       .replace(/\n\n/g, '<br><br>')
-      .replace(/\n- /g, '<br>• ');
-    return html;
+      .replace(/\n• /g, '<br>• ');
   }
 
-  // Strictly grounded response generator using portfolioData
-  generateGroundedResponse(query) {
+  escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  /**
+   * Client-side Vector/Keyword Retrieval fallback
+   * Used only if serverless backend is completely unreachable
+   */
+  clientSideRetrieve(query) {
     const q = query.toLowerCase();
     const data = portfolioData;
+    const matches = [];
 
-    // 1. Identity, Specialization & Bio
-    if (q.includes('who is') || q.includes('about') || q.includes('specializ') || q.includes('degree') || q.includes('student') || q.includes('education')) {
-      return `**${data.profile.name}** is an **${data.profile.role}** and Computer Science student specializing in **${data.profile.specialization}**.\n\n` +
-        `• **Mission**: ${data.profile.tagline}\n` +
-        `• **Education**: ${data.profile.education.degree} (${data.profile.education.focus})\n\n` +
-        `Rafia focuses on real-time rendering, 3D math, physics-driven interactions, and player immersion across modern game engines and WebGL!`;
-    }
-
-    // 2. Specific Project Queries
-    if (q.includes('space journey') || q.includes('three.js') || q.includes('portfolio website') || q.includes('web3d')) {
-      const proj = data.projects.find((p) => p.id === 'project-space-journey');
-      return `**${proj.title}** is this very website! It is a real-time, third-person 3D space journey built using **Three.js, WebGL, HTML5, and CSS3** without any heavy frontend frameworks.\n\n` +
-        `• **Features**: Procedural celestial scene, custom 3rd person character controller, interactive orbital landmarks, and full mobile touch controls.\n` +
-        `• **Tech**: ${proj.technologies.join(', ')}`;
-    }
-
-    if (q.includes('gameplay') || q.includes('platformer') || q.includes('mechanic')) {
-      const proj = data.projects.find((p) => p.id === 'project-gameplay-prototype');
-      return `**${proj.title}**:\n` +
-        `${proj.summary}\n\n` +
-        `• **Details**: ${proj.details}\n` +
-        `• **Stack**: ${proj.technologies.join(', ')}`;
-    }
-
-    if (q.includes('animation') || q.includes('rigging') || q.includes('walk') || q.includes('blender')) {
-      const proj = data.projects.find((p) => p.id === 'project-animation-study');
-      return `**${proj.title}**:\n` +
-        `${proj.summary}\n\n` +
-        `• **Focus**: ${proj.details}\n` +
-        `• **Tools**: ${proj.technologies.join(', ')}`;
-    }
-
-    if (q.includes('project') || q.includes('games') || q.includes('work') || q.includes('portfolio')) {
-      let reply = `Here are the key projects featured in Rafia's portfolio:\n`;
-      data.projects.forEach((p) => {
-        reply += `\n• **${p.title}** (${p.category}): ${p.summary}`;
+    // Match projects
+    data.projects?.forEach(p => {
+      let score = 0;
+      const titleLower = p.title.toLowerCase();
+      if (q.includes(titleLower) || titleLower.split(' ').some(w => w.length > 3 && q.includes(w))) score += 5;
+      p.technologies.forEach(t => {
+        if (q.includes(t.toLowerCase())) score += 2;
       });
-      reply += `\n\nYou can explore them directly in **The Orbital Hangar** landmark or via the Projects button in the HUD!`;
-      return reply;
-    }
-
-    // 3. Skills, Engine & Language Queries
-    if (q.includes('skill') || q.includes('engine') || q.includes('unity') || q.includes('unreal') || q.includes('language') || q.includes('c++') || q.includes('c#') || q.includes('tech stack')) {
-      let reply = `**Rafia's Technical Skillset Matrix:**\n`;
-      data.skills.forEach((cat) => {
-        reply += `\n**${cat.category}**:\n`;
-        cat.items.forEach((item) => {
-          reply += `• **${item.name}** (${item.level}) - ${item.desc}\n`;
+      if (p.contribution && q.includes('contribution')) score += 3;
+      if (score > 0) {
+        matches.push({
+          title: `Project: ${p.title}`,
+          link: `./projects.html#${p.id}`,
+          content: `${p.summary}\n${p.contribution ? 'Contribution: ' + p.contribution : ''}`,
+          score
         });
+      }
+    });
+
+    // Match Education / Certifications
+    if (q.includes('education') || q.includes('ned') || q.includes('university') || q.includes('study')) {
+      matches.push({
+        title: 'Education - NED University',
+        link: './about.html#education',
+        content: `${data.education.degree} (${data.education.specialization}) at ${data.education.institution}. Status: ${data.education.status}.`,
+        score: 6
       });
-      return reply;
     }
 
-    // 4. Contact & Socials
-    if (q.includes('contact') || q.includes('email') || q.includes('github') || q.includes('hire') || q.includes('reach') || q.includes('linkedin')) {
-      return `You can get in touch with Rafia Gull via the **Deep Space Relay** station or the following channels:\n\n` +
-        `• **Email**: ${data.profile.contact.email}\n` +
-        `• **GitHub**: [Rafia's GitHub](${data.profile.contact.github})\n` +
-        `• **LinkedIn**: [Rafia's LinkedIn](${data.profile.contact.linkedin})\n` +
-        `• **Status**: ${data.profile.contact.location}\n\n` +
-        `You can also use the message form on the Deep Space Relay screen!`;
+    if (q.includes('certif') || q.includes('cega') || q.includes('course')) {
+      matches.push({
+        title: 'Professional Certifications (CEGA)',
+        link: './about.html#certifications',
+        content: data.certifications.map(c => `${c.title} certified by ${c.issuer}: ${c.topics}`).join('\n'),
+        score: 6
+      });
     }
 
-    // 5. Controls & How to play
-    if (q.includes('control') || q.includes('how to play') || q.includes('how to move') || q.includes('wasd')) {
-      return `**Exploration Controls:**\n` +
-        `• **Move**: W/A/S/D or Arrow keys (or the on-screen joystick on touch devices)\n` +
-        `• **Look / Orbit**: Click & drag on background / swipe screen\n` +
-        `• **Boost / Sprint**: Hold Shift\n` +
-        `• **Jetpack / Hover**: Space bar\n` +
-        `• **Inspect Station**: Press **E** or click the interaction prompt when approaching a station\n` +
-        `• **Quick Warp**: Use the navigation buttons at the top of the HUD to teleport instantly!`;
+    if (q.includes('skill') || q.includes('language') || q.includes('tool') || q.includes('engine')) {
+      matches.push({
+        title: 'Technical Skills Matrix',
+        link: './about.html#skills',
+        content: data.skills.map(s => `${s.category}: ${s.items.map(i => i.name).join(', ')}`).join('\n'),
+        score: 4
+      });
     }
 
-    // Fallback grounded answer
-    return `I am programmed with verified data on **Rafia Gull's** game development journey, computer science studies in Gaming & Animation, 3D projects, and skills.\n\n` +
-      `Feel free to ask about:\n` +
-      `• Rafia's background and specialization\n` +
-      `• The 3D Space Journey or Game Projects\n` +
-      `• Game engines, C++, C#, Three.js, or animation tools\n` +
-      `• How to connect with Rafia`;
+    if (matches.length === 0) return null;
+
+    matches.sort((a, b) => b.score - a.score);
+    const top = matches.slice(0, 3);
+    const answer = top.map(m => `• **${m.title}**:\n${m.content}`).join('\n\n');
+
+    return {
+      answer: `*(Client offline retrieval)*:\n\n${answer}`,
+      sources: top.map(m => ({ title: m.title, link: m.link }))
+    };
   }
 }

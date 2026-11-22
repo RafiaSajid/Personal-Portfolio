@@ -1,0 +1,20 @@
+{
+  "name": "rafia-gull-portfolio",
+  "version": "1.0.0",
+  "description": "Interactive 3D space journey portfolio and RAG chatbot for Rafia Gull.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "build:rag": "node scripts/build-rag-index.js",
+    "build": "node scripts/build-rag-index.js"
+  },
+  "keywords": [
+    "portfolio",
+    "threejs",
+    "rag",
+    "game-developer",
+    "webgl"
+  ],
+  "author": "Rafia Gull",
+  "license": "MIT"
+}

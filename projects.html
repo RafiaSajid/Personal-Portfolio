@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <meta name="description" content="Projects by Rafia Gull - VR, 3D, 2D games, and software built with Unity, Unreal Engine, C++, and Python." />
+  <title>Projects | Rafia Gull - Game Developer</title>
+  <link rel="stylesheet" href="./styles/style.css" />
+</head>
+<body class="page-mode">
+  <!-- Top Navigation Bar -->
+  <header id="top-nav" role="banner">
+    <a href="./index.html" class="nav-brand" aria-label="Return to Home 3D Scene">
+      <div class="nav-brand-dot" aria-hidden="true"></div>
+      <div>
+        <div class="nav-brand-name">RAFIA GULL</div>
+        <div class="nav-brand-role">GAMING & ANIMATION • NED UNIVERSITY</div>
+      </div>
+    </a>
+
+    <nav aria-label="Main Navigation">
+      <ul class="nav-links">
+        <li><a href="./index.html">Home</a></li>
+        <li><a href="./about.html">About Me</a></li>
+        <li><a href="./projects.html" aria-current="page">Projects</a></li>
+        <li><a href="./index.html#education">Education</a></li>
+        <li><a href="./index.html#skills">Skills</a></li>
+        <li><a href="./about.html#contact-section">Contact</a></li>
+      </ul>
+    </nav>
+
+    <button id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">&#9776;</button>
+  </header>
+
+  <!-- Mobile Dropdown Menu -->
+  <div id="nav-mobile" role="navigation" aria-label="Mobile Navigation">
+    <a href="./index.html">Home (3D Scene)</a>
+    <a href="./about.html">About Me</a>
+    <a href="./projects.html" aria-current="page">Projects</a>
+    <a href="./index.html#education">Education</a>
+    <a href="./index.html#skills">Skills</a>
+    <a href="./about.html#contact-section">Contact</a>
+  </div>
+
+  <!-- Page Content -->
+  <main class="page-layout">
+    <a href="./index.html" class="back-link" aria-label="Return to 3D Space Journey">Return to 3D Scene</a>
+
+    <section class="page-hero">
+      <h1>PROJECTS CATALOG</h1>
+      <p class="subtitle">Unity, Unreal Engine, VR, C++, and Python Applications</p>
+      <p id="hero-summary">
+        Explore 2D, 3D, and VR projects developed by Rafia Gull. Includes hands-on contributions across gameplay mechanics, character animation in Blender, dialogue systems, Minimax AI, and full-stack software.
+      </p>
+    </section>
+
+    <!-- Filter Buttons (Dynamically Populated from Data) -->
+    <div class="filter-bar" id="category-filter-bar" role="toolbar" aria-label="Project Category Filter">
+      <!-- Injected by script -->
+    </div>
+
+    <!-- Projects Grid Container -->
+    <section class="projects-grid" id="projects-container" aria-live="polite">
+      <!-- Injected dynamically from portfolioData.js -->
+    </section>
+
+    <!-- Empty State Container (shown when filter matches 0 items) -->
+    <div id="empty-state" class="empty-state" style="display:none;" role="status">
+      <div class="empty-icon" aria-hidden="true">✦</div>
+      <h3>No Projects Found</h3>
+      <p>No projects match the selected filter. Try selecting "All Projects" to view the complete catalog.</p>
+      <button class="filter-btn active" id="reset-filter-btn" style="margin-top: 1rem;">View All Projects</button>
+    </div>
+  </main>
+
+  <!-- Project Detail Modal Dialog -->
+  <div id="project-detail-modal" class="project-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-proj-title" style="display:none;">
+    <div class="project-modal-window">
+      <div class="project-modal-header">
+        <div>
+          <span class="card-tag" id="modal-proj-category">CATEGORY</span>
+          <h2 id="modal-proj-title" style="margin-top:0.4rem; color:#fff;">Project Title</h2>
+        </div>
+        <button id="close-detail-modal" class="modal-close-btn" aria-label="Close Project Details">&times;</button>
+      </div>
+
+      <div class="project-modal-body">
+        <!-- Media container (renders image/video if provided) -->
+        <div id="modal-media-wrap" class="modal-media-wrap" style="display:none;"></div>
+
+        <!-- Description -->
+        <div class="detail-section">
+          <h3>PROJECT OVERVIEW</h3>
+          <p id="modal-proj-details" style="color:#cbd5e1; line-height:1.65;"></p>
+        </div>
+
+        <!-- Contribution Section (if present) -->
+        <div id="modal-contribution-section" class="detail-section" style="display:none;">
+          <h3 style="color:var(--emerald);">KEY CONTRIBUTION</h3>
+          <p id="modal-proj-contribution" style="color:#e2e8f0; line-height:1.6;"></p>
+        </div>
+
+        <!-- Technologies -->
+        <div class="detail-section">
+          <h3>TECHNOLOGIES</h3>
+          <div id="modal-proj-tech" class="card-tech"></div>
+        </div>
+
+        <!-- External Links (Only visible if URL is provided) -->
+        <div id="modal-links-section" class="detail-section" style="display:none;">
+          <h3>PROJECT LINKS</h3>
+          <div id="modal-proj-links" style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:0.5rem;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamic Project Renderer Script -->
+  <script type="module">
+    import { portfolioData } from './src/data/portfolioData.js';
+
+    const projects = [...portfolioData.projects].sort((a, b) => (a.order || 99) - (b.order || 99));
+    const container = document.getElementById('projects-container');
+    const filterBar = document.getElementById('category-filter-bar');
+    const emptyState = document.getElementById('empty-state');
+    const resetFilterBtn = document.getElementById('reset-filter-btn');
+
+    // Detail Modal Elements
+    const modal = document.getElementById('project-detail-modal');
+    const modalClose = document.getElementById('close-detail-modal');
+    const modalTitle = document.getElementById('modal-proj-title');
+    const modalCat = document.getElementById('modal-proj-category');
+    const modalDetails = document.getElementById('modal-proj-details');
+    const modalContribSec = document.getElementById('modal-contribution-section');
+    const modalContrib = document.getElementById('modal-proj-contribution');
+    const modalTech = document.getElementById('modal-proj-tech');
+    const modalMediaWrap = document.getElementById('modal-media-wrap');
+    const modalLinksSec = document.getElementById('modal-links-section');
+    const modalLinks = document.getElementById('modal-proj-links');
+
+    let currentFilter = 'all';
+
+    // 1. Build Filter Buttons
+    function buildFilters() {
+      const categories = ['all', ...new Set(projects.map(p => p.category))];
+      filterBar.innerHTML = '';
+
+      categories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = `filter-btn ${cat === currentFilter ? 'active' : ''}`;
+        btn.textContent = cat === 'all' ? `All Projects (${projects.length})` : cat;
+        btn.setAttribute('data-category', cat);
+        btn.addEventListener('click', () => {
+          currentFilter = cat;
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderProjects();
+        });
+        filterBar.appendChild(btn);
+      });
+    }
+
+    // 2. Render Cards based on filter
+    function renderProjects() {
+      container.innerHTML = '';
+      const filtered = currentFilter === 'all'
+        ? projects
+        : projects.filter(p => p.category === currentFilter);
+
+      if (filtered.length === 0) {
+        emptyState.style.display = 'block';
+        return;
+      } else {
+        emptyState.style.display = 'none';
+      }
+
+      filtered.forEach(p => {
+        const card = document.createElement('article');
+        card.className = 'project-card';
+        card.setAttribute('data-id', p.id);
+
+        card.innerHTML = `
+          <div class="card-top">
+            <span class="card-tag">${escapeHTML(p.category)}</span>
+            ${p.featured ? '<span class="featured-badge">Featured</span>' : ''}
+          </div>
+          <h2 class="card-title">${escapeHTML(p.title)}</h2>
+          <p class="card-summary">${escapeHTML(p.summary)}</p>
+          
+          ${p.contribution ? `
+            <div class="card-contribution-preview">
+              <strong style="color:var(--emerald); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.04em;">Contribution:</strong>
+              <p style="font-size:0.8rem; color:#cbd5e1; margin-top:0.2rem; line-height:1.4;">${escapeHTML(p.contribution)}</p>
+            </div>
+          ` : ''}
+
+          <div class="card-tech">
+            ${p.technologies.map(t => `<span class="tech-pill">${escapeHTML(t)}</span>`).join('')}
+          </div>
+
+          <div class="card-actions">
+            <button class="card-btn card-btn-primary view-details-btn">View Details &rarr;</button>
+          </div>
+        `;
+
+        card.querySelector('.view-details-btn').addEventListener('click', () => {
+          openDetailModal(p);
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    // 3. Open Detail Modal
+    function openDetailModal(p) {
+      modalTitle.textContent = p.title;
+      modalCat.textContent = p.category;
+      modalDetails.textContent = p.details;
+
+      // Contribution
+      if (p.contribution) {
+        modalContrib.textContent = p.contribution;
+        modalContribSec.style.display = 'block';
+      } else {
+        modalContribSec.style.display = 'none';
+      }
+
+      // Tech tags
+      modalTech.innerHTML = p.technologies
+        .map(t => `<span class="tech-pill">${escapeHTML(t)}</span>`)
+        .join('');
+
+      // Optional Media (Video or Thumbnail)
+      modalMediaWrap.innerHTML = '';
+      if (p.videoUrl) {
+        modalMediaWrap.style.display = 'block';
+        modalMediaWrap.innerHTML = `
+          <video controls preload="metadata" style="width:100%; max-height:300px; border-radius:8px;">
+            <source src="${p.videoUrl}" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        `;
+      } else if (p.thumbnail) {
+        modalMediaWrap.style.display = 'block';
+        modalMediaWrap.innerHTML = `
+          <img src="${p.thumbnail}" alt="${escapeHTML(p.title)} Preview" style="width:100%; max-height:280px; object-fit:cover; border-radius:8px;" />
+        `;
+      } else {
+        modalMediaWrap.style.display = 'none';
+      }
+
+      // Optional Links (Only rendered if URL is provided and non-empty!)
+      modalLinks.innerHTML = '';
+      let hasLinks = false;
+
+      if (p.githubUrl && p.githubUrl.trim() !== '') {
+        hasLinks = true;
+        modalLinks.innerHTML += `
+          <a href="${p.githubUrl}" target="_blank" rel="noopener noreferrer" class="card-btn card-btn-secondary" style="padding:0.45rem 1rem;">
+            GitHub Repository
+          </a>
+        `;
+      }
+
+      if (p.linkedinUrl && p.linkedinUrl.trim() !== '') {
+        hasLinks = true;
+        modalLinks.innerHTML += `
+          <a href="${p.linkedinUrl}" target="_blank" rel="noopener noreferrer" class="card-btn card-btn-secondary" style="padding:0.45rem 1rem;">
+            LinkedIn Post
+          </a>
+        `;
+      }
+
+      modalLinksSec.style.display = hasLinks ? 'block' : 'none';
+
+      // Show modal
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      modalClose.focus();
+    }
+
+    function closeDetailModal() {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+      // Pause video if playing
+      const video = modalMediaWrap.querySelector('video');
+      if (video) video.pause();
+    }
+
+    modalClose.addEventListener('click', closeDetailModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeDetailModal();
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.style.display === 'flex') {
+        closeDetailModal();
+      }
+    });
+
+    resetFilterBtn?.addEventListener('click', () => {
+      currentFilter = 'all';
+      buildFilters();
+      renderProjects();
+    });
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // Initialize
+    buildFilters();
+    renderProjects();
+
+    // Mobile nav toggle
+    const navToggle = document.getElementById('nav-toggle');
+    const navMobile = document.getElementById('nav-mobile');
+    if (navToggle && navMobile) {
+      navToggle.addEventListener('click', () => {
+        const isOpen = navMobile.classList.toggle('open');
+        navToggle.setAttribute('aria-expanded', isOpen);
+      });
+    }
+  </script>
+</body>
+</html>

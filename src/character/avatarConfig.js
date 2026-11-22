@@ -1,37 +1,50 @@
 /**
- * Avatar Configuration
+ * Avatar Configuration for Rafia Gull's 3D Portfolio
  *
- * Rafia: When you are ready to use your custom 3D avatar:
- * 1. Place your .glb or .gltf file inside an assets folder (e.g. `./assets/avatar.glb`).
- * 2. Set `modelPath` to the relative path of your file.
- * 3. Set `idleClipName` and `walkClipName` to match the exact names of your animations inside the model.
+ * HOW TO ADD YOUR OWN 3D AVATAR:
+ * 1. Place your .glb or .gltf avatar file inside the project (e.g., in an `assets/` folder).
+ * 2. Set `modelPath` to the relative URL of your file, e.g.:
+ *      modelPath: './assets/avatar.glb'
+ * 3. Set the animation clip names to match the exact names inside your model:
+ *      animationNames: {
+ *        idle: 'idle',  // name of your idle animation
+ *        walk: 'walk',  // name of your walk animation
+ *      }
+ * 4. Adjust `scale` and `rotationOffset` if your model exports at a different orientation or unit size.
  *
- * If `modelPath` is null or cannot be loaded, the system automatically uses a sleek
- * procedural space traveler avatar with smooth idle floating and walking locomotion.
+ * If `modelPath` is null or if loading fails, the system automatically uses a polished
+ * procedural space explorer with real-time walking and idle locomotion animations.
  */
 
 export const avatarConfig = {
-  // Set to relative URL string (e.g. './assets/rafia_avatar.glb') or null for procedural avatar
-  modelPath: null,
+  // Set to your GLB/glTF path, or null to use the procedural space explorer
+  modelPath: './assets/Portfolio.glb',
 
-  // Desired avatar scale and position adjustments
-  scale: 1.0,
-  positionOffset: [0, 0, 0],
-  rotationOffset: [0, Math.PI, 0], // Radians (Y-axis)
+  // Animation names matching clips inside your GLTF file
+  animationNames: {
+    idle: "Idle",
+    walk: "_walk"
+  },
 
-  // Animation names embedded in your GLTF/GLB file
-  animations: {
-    idleClipName: "idle",
-    walkClipName: "walk",
-    runClipName: "run", // optional
+  // Model scale and transform offsets
+  scale: 0.6,
+  positionOffset: [0, 0, 2],
+  rotationOffset: [0, MATHPI, 0], // Rotated to face forward along negative Z
+
+  // Walkable Route Boundary Constraints:
+  // Keeps the avatar strictly within the star path corridor so it cannot wander into space or asteroids
+  bounds: {
+    minX: -4.5,   // Left path boundary
+    maxX: 4.5,    // Right path boundary
+    minZ: -175.0, // Forward-most limit (beyond Skills landmark)
+    maxZ: 8.0     // Backward-most starting dock limit
   },
 
   // Locomotion tuning
   movement: {
-    walkSpeed: 9.0,
-    runSpeed: 16.0,
-    rotationSpeed: 10.0,
-    acceleration: 15.0,
+    walkSpeed: 7.5,
+    rotationSpeed: 9.0,
+    acceleration: 14.0,
     deceleration: 12.0
   }
 };

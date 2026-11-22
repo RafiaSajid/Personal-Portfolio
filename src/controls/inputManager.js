@@ -1,41 +1,33 @@
 import * as THREE from 'three';
 
 export class InputManager {
-  constructor(canvasElement, onInteractCallback = null) {
+  constructor(canvasElement, { onInteract = null, onCameraRotate = null, onCameraZoom = null } = {}) {
     this.canvas = canvasElement;
-    this.onInteract = onInteractCallback;
+    this.onInteract = onInteract;
+    this.onCameraRotate = onCameraRotate;
+    this.onCameraZoom = onCameraZoom;
 
-    // Output state consumed by AvatarController
+    // Movement vector consumption
     this.moveVector = new THREE.Vector2(0, 0);
     this.isSprinting = false;
-    this.isJumping = false;
     this.isDraggingCamera = false;
+    this.previousPointerPos = { x: 0, y: 0 };
 
-    // Key states
     this.keys = {
       forward: false,
       backward: false,
       left: false,
       right: false,
-      sprint: false,
-      jump: false
+      sprint: false
     };
 
-    // Pointer tracking
-    this.previousPointerPos = { x: 0, y: 0 };
-    this.activePointers = new Map();
-
-    // Virtual Joystick state for mobile
-    this.joystick = {
-      active: false,
-      origin: { x: 0, y: 0 },
-      current: { x: 0, y: 0 },
-      identifier: null,
-      maxRadius: 50
+    // D-Pad state for mobile
+    this.dpadState = {
+      up: false,
+      down: false,
+      left: false,
+      right: false
     };
-
-    this.onCameraRotate = null;
-    this.onCameraZoom = null;
 
     this.init();
   }
@@ -43,49 +35,62 @@ export class InputManager {
   init() {
     this.setupKeyboard();
     this.setupMouse();
-    this.setupTouch();
+    this.setupTouchAndDpad();
   }
 
   setupKeyboard() {
     window.addEventListener('keydown', (e) => {
-      // Avoid intercepting input if typing into form inputs or chat
-      if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+      // CRITICAL: Stop keyboard controls from hijacking typing when using an input, textarea, or chatbot!
+      const activeTag = document.activeElement?.tagName;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag) || document.activeElement?.isContentEditable) {
+        if (e.key === 'Escape') {
+          // Allow Escape to unfocus or close panels
+          document.activeElement.blur();
+        }
+        return;
+      }
 
       switch (e.code) {
         case 'KeyW':
         case 'ArrowUp':
           this.keys.forward = true;
+          this.hideIntroHint();
           break;
         case 'KeyS':
         case 'ArrowDown':
           this.keys.backward = true;
+          this.hideIntroHint();
           break;
         case 'KeyA':
         case 'ArrowLeft':
           this.keys.left = true;
+          this.hideIntroHint();
           break;
         case 'KeyD':
         case 'ArrowRight':
           this.keys.right = true;
+          this.hideIntroHint();
           break;
         case 'ShiftLeft':
         case 'ShiftRight':
           this.keys.sprint = true;
           break;
-        case 'Space':
-          this.keys.jump = true;
-          e.preventDefault();
-          break;
         case 'KeyE':
         case 'Enter':
           if (this.onInteract) this.onInteract();
           break;
+        case 'Escape':
+          window.dispatchEvent(new CustomEvent('ui:escape'));
+          break;
       }
-      this.updateMovementVector();
+      this.updateMovement();
     });
 
     window.addEventListener('keyup', (e) => {
-      if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+      const activeTag = document.activeElement?.tagName;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag) || document.activeElement?.isContentEditable) {
+        return;
+      }
 
       switch (e.code) {
         case 'KeyW':
@@ -108,25 +113,20 @@ export class InputManager {
         case 'ShiftRight':
           this.keys.sprint = false;
           break;
-        case 'Space':
-          this.keys.jump = false;
-          break;
       }
-      this.updateMovementVector();
+      this.updateMovement();
     });
   }
 
-  updateMovementVector() {
-    // If virtual joystick is active on touch, it overrides keyboard
-    if (this.joystick.active) return;
-
+  updateMovement() {
     let x = 0;
     let y = 0;
 
-    if (this.keys.left) x -= 1;
-    if (this.keys.right) x += 1;
-    if (this.keys.forward) y += 1;
-    if (this.keys.backward) y -= 1;
+    // Merge keyboard + mobile D-pad input
+    if (this.keys.left || this.dpadState.left) x -= 1;
+    if (this.keys.right || this.dpadState.right) x += 1;
+    if (this.keys.forward || this.dpadState.up) y += 1;
+    if (this.keys.backward || this.dpadState.down) y -= 1;
 
     this.moveVector.set(x, y);
     if (this.moveVector.lengthSq() > 1) {
@@ -134,21 +134,22 @@ export class InputManager {
     }
 
     this.isSprinting = this.keys.sprint;
-    this.isJumping = this.keys.jump;
   }
 
   setupMouse() {
     this.canvas.addEventListener('mousedown', (e) => {
-      this.isDraggingCamera = true;
-      this.previousPointerPos = { x: e.clientX, y: e.clientY };
+      // Left click drag on canvas orbits camera
+      if (e.button === 0) {
+        this.isDraggingCamera = true;
+        this.previousPointerPos = { x: e.clientX, y: e.clientY };
+      }
     });
 
     window.addEventListener('mousemove', (e) => {
       if (!this.isDraggingCamera) return;
 
-      const deltaX = (e.clientX - this.previousPointerPos.x) * 0.005;
+      const deltaX = (e.clientX - this.previousPointerPos.x) * 0.004;
       const deltaPitch = (e.clientY - this.previousPointerPos.y) * 0.003;
-
       this.previousPointerPos = { x: e.clientX, y: e.clientY };
 
       if (this.onCameraRotate) {
@@ -162,90 +163,69 @@ export class InputManager {
 
     this.canvas.addEventListener('wheel', (e) => {
       e.preventDefault();
-      const deltaZoom = Math.sign(e.deltaY) * 0.6;
+      const deltaZoom = Math.sign(e.deltaY) * 0.5;
       if (this.onCameraZoom) {
         this.onCameraZoom(deltaZoom);
       }
     }, { passive: false });
   }
 
-  setupTouch() {
-    const joystickZone = document.getElementById('virtual-joystick-zone');
-    const joystickHandle = document.getElementById('virtual-joystick-handle');
+  setupTouchAndDpad() {
+    // Mobile D-Pad button handling
+    const dpadButtons = document.querySelectorAll('.dpad-btn');
+    dpadButtons.forEach((btn) => {
+      const dir = btn.getAttribute('data-dir');
+      if (!dir) return;
 
-    if (!joystickZone) return;
-
-    // Handle touch movement on joystick zone
-    joystickZone.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      const touch = e.changedTouches[0];
-      const rect = joystickZone.getBoundingClientRect();
-      this.joystick.active = true;
-      this.joystick.identifier = touch.identifier;
-      this.joystick.origin = {
-        x: rect.left + rect.width / 2,
-        y: rect.top + rect.height / 2
+      const handlePress = (e) => {
+        e.preventDefault();
+        this.dpadState[dir] = true;
+        btn.classList.add('pressed');
+        this.hideIntroHint();
+        this.updateMovement();
       };
-      this.updateJoystickPosition(touch.clientX, touch.clientY, joystickHandle);
-    }, { passive: false });
 
-    window.addEventListener('touchmove', (e) => {
-      for (let i = 0; i < e.changedTouches.length; i++) {
-        const touch = e.changedTouches[i];
-        if (this.joystick.active && touch.identifier === this.joystick.identifier) {
-          e.preventDefault();
-          this.updateJoystickPosition(touch.clientX, touch.clientY, joystickHandle);
-        } else if (!this.joystick.active || touch.identifier !== this.joystick.identifier) {
-          // Other touch moves camera
-          if (this.previousPointerPos.x !== 0) {
-            const deltaX = (touch.clientX - this.previousPointerPos.x) * 0.007;
-            const deltaPitch = (touch.clientY - this.previousPointerPos.y) * 0.005;
-            if (this.onCameraRotate) this.onCameraRotate(deltaX, deltaPitch);
-          }
-          this.previousPointerPos = { x: touch.clientX, y: touch.clientY };
+      const handleRelease = (e) => {
+        e.preventDefault();
+        this.dpadState[dir] = false;
+        btn.classList.remove('pressed');
+        this.updateMovement();
+      };
+
+      btn.addEventListener('touchstart', handlePress, { passive: false });
+      btn.addEventListener('touchend', handleRelease, { passive: false });
+      btn.addEventListener('touchcancel', handleRelease, { passive: false });
+      btn.addEventListener('mousedown', handlePress);
+      btn.addEventListener('mouseup', handleRelease);
+      btn.addEventListener('mouseleave', handleRelease);
+    });
+
+    // Touch swipe on canvas rotates camera
+    let touchStart = { x: 0, y: 0 };
+    this.canvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+    }, { passive: true });
+
+    this.canvas.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        const dx = (touch.clientX - touchStart.x) * 0.006;
+        const dy = (touch.clientY - touchStart.y) * 0.004;
+        touchStart = { x: touch.clientX, y: touch.clientY };
+
+        if (this.onCameraRotate) {
+          this.onCameraRotate(dx, dy);
         }
       }
-    }, { passive: false });
-
-    const endTouch = (e) => {
-      for (let i = 0; i < e.changedTouches.length; i++) {
-        const touch = e.changedTouches[i];
-        if (touch.identifier === this.joystick.identifier) {
-          this.joystick.active = false;
-          this.joystick.identifier = null;
-          this.moveVector.set(0, 0);
-          if (joystickHandle) {
-            joystickHandle.style.transform = `translate(0px, 0px)`;
-          }
-        }
-      }
-      this.previousPointerPos = { x: 0, y: 0 };
-    };
-
-    window.addEventListener('touchend', endTouch);
-    window.addEventListener('touchcancel', endTouch);
+    }, { passive: true });
   }
 
-  updateJoystickPosition(clientX, clientY, handleElement) {
-    const dx = clientX - this.joystick.origin.x;
-    const dy = clientY - this.joystick.origin.y;
-    const distance = Math.hypot(dx, dy);
-    const maxRadius = this.joystick.maxRadius;
-
-    const angle = Math.atan2(dy, dx);
-    const clampedDist = Math.min(distance, maxRadius);
-
-    const targetX = Math.cos(angle) * clampedDist;
-    const targetY = Math.sin(angle) * clampedDist;
-
-    if (handleElement) {
-      handleElement.style.transform = `translate(${targetX}px, ${targetY}px)`;
+  hideIntroHint() {
+    const hint = document.getElementById('home-intro');
+    if (hint && !hint.classList.contains('hidden')) {
+      hint.classList.add('hidden');
     }
-
-    // Normalized move vector (-1 to 1)
-    const normX = targetX / maxRadius;
-    const normY = -(targetY / maxRadius); // Invert Y for forward direction
-
-    this.moveVector.set(normX, normY);
   }
 }

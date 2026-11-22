@@ -1,207 +1,303 @@
 /**
- * Rafia Gull - Personal Portfolio Data
- * Data-driven configuration for projects, skills, biography, and landmarks.
- * Easily update or add new projects here without altering 3D engine code.
+ * Rafia Gull - Portfolio Structured Data Source
+ * 
+ * ============================================================================
+ * HOW TO MANAGE PROJECTS:
+ * ============================================================================
+ * To ADD, REMOVE, or UPDATE a project, edit the `projects` array below.
+ * Both `projects.html`, the in-scene 3D modals, and the ASTRA AI chatbot will
+ * automatically update without requiring changes to any HTML or 3D scene code!
+ * 
+ * PROJECT RECORD SCHEMA:
+ * - id          : (String) Unique, URL-safe identifier (e.g. 'vr-games-hub')
+ * - title       : (String) Display title of the project
+ * - category    : (String) Primary category ('VR', '3D Games', '2D Games', 'C++ Games', 'Python Apps')
+ * - technologies: (Array<String>) List of tools/languages/engines used
+ * - summary     : (String) Short 1-2 sentence description for cards
+ * - details     : (String) Detailed technical breakdown of the project
+ * - contribution: (String | null) Your specific role and contributions
+ * - githubUrl   : (String | null) GitHub repo link; set to null or '' to cleanly hide
+ * - linkedinUrl : (String | null) LinkedIn post/demo link; set to null or '' to cleanly hide
+ * - videoUrl    : (String | null) Video embed/file URL (e.g. './assets/videos/demo.mp4' or YouTube embed)
+ * - thumbnail   : (String | null) Card image (e.g. './assets/thumbnails/project-preview.png')
+ * - featured    : (Boolean) Whether to feature prominently
+ * - order       : (Number) Integer ordering in the project catalog
+ * 
+ * WHERE TO PLACE ASSETS:
+ * - Thumbnail images: Place in `./assets/thumbnails/` and reference as `./assets/thumbnails/<filename>`
+ * - Video demos     : Place in `./assets/videos/` and reference as `./assets/videos/<filename>`
+ * - 3D Avatar model : Place in `./assets/avatar.glb` and configure in `avatarConfig.js`
+ * ============================================================================
  */
 
 export const portfolioData = {
   profile: {
     name: "Rafia Gull",
     role: "Aspiring Game Developer",
-    specialization: "Gaming & Animation",
-    education: {
-      degree: "Bachelor of Science in Computer Science",
-      focus: "Specializing in Gaming and Animation",
-      status: "Student / Developer"
-    },
-    tagline: "Crafting immersive worlds, dynamic gameplay mechanics, and real-time interactive 3D experiences.",
+    university: "NED University",
+    location: "Karachi, Sindh, Pakistan",
+    summary: "Computer Science student at NED University specializing in Gaming and Animation. Experience delivering 2D, 3D, and VR projects using Unity and Unreal Engine, with additional projects in Python and C++.",
     bio: [
-      "I am a Computer Science student with a passionate specialization in Gaming and Animation. My mission is to merge technical computer science principles—algorithms, math, and systems—with creative game design and visual storytelling.",
-      "Driven by real-time rendering, physics-driven interactions, and player immersion, I build interactive 3D simulations and games across modern game engines and the web.",
-      "Always exploring novel graphics techniques, procedural generation, character animation, and responsive game mechanics."
+      "I am a Computer Science student at NED University in Karachi, Sindh, Pakistan, specializing in Gaming and Animation.",
+      "My hands-on experience spans delivering 2D, 3D, and immersive VR projects using Unity and Unreal Engine, along with foundational software and games engineered in Python and C++.",
+      "I focus on core gameplay mechanics, character animation, physics systems, and interactive problem solving."
     ],
-    // Placeholders for personal contact - update with your verified URLs/emails
+    // Contact & social links
+    // Email is currently a placeholder from resume until user confirms real email
+    // GitHub and LinkedIn are omitted until valid URLs are provided
     contact: {
-      email: "rafia.gull@example.com", // Replace with your actual email
-      github: "https://github.com",       // Replace with your GitHub profile URL
-      linkedin: "https://linkedin.com",   // Replace with your LinkedIn URL
-      itch: "https://itch.io",           // Replace with your Itch.io page (if any)
-      location: "Available for Remote & On-site Opportunities"
+      email: "abc@gmail.com",
+      isEmailPlaceholder: true,
+      githubUrl: null,    // Set to valid URL when ready (e.g. "https://github.com/username")
+      linkedinUrl: null,  // Set to valid URL when ready (e.g. "https://linkedin.com/in/username")
+      itchUrl: null,      // Optional itch.io profile
+      location: "Karachi, Sindh, Pakistan"
     }
   },
 
-  // Interactive 3D World Landmarks
-  landmarks: [
+  // Academic Education
+  education: {
+    institution: "NED University",
+    location: "Karachi, Sindh, Pakistan",
+    degree: "Bachelor of Science in Computer Science",
+    specialization: "Specialization in Gaming and Animation",
+    status: "Currently studying",
+    summary: "Comprehensive Computer Science degree program with dedicated specialization coursework in Gaming and Animation."
+  },
+
+  // Certifications
+  certifications: [
     {
-      id: "spawn",
-      title: "Navigation Dock",
-      subtitle: "Arrival Platform",
-      code: "NAV-01",
-      position: { x: 0, y: 0, z: 12 },
-      color: 0x00ffff,
-      type: "beacon"
+      id: "cert-unreal",
+      title: "Unreal Course",
+      issuer: "CEGA",
+      topics: "Practical game development and visualization."
     },
     {
-      id: "about",
-      title: "Command Hub",
-      subtitle: "Bio & Specialization",
-      code: "CMD-02",
-      position: { x: -32, y: 1, z: -25 },
-      color: 0x8b5cf6,
-      type: "station",
-      actionText: "Open Command Hub"
-    },
-    {
-      id: "projects",
-      title: "The Orbital Hangar",
-      subtitle: "Game Projects & Demos",
-      code: "HGR-03",
-      position: { x: 0, y: 3, z: -55 },
-      color: 0x38bdf8,
-      type: "hangar",
-      actionText: "Enter Orbital Hangar"
-    },
-    {
-      id: "skills",
-      title: "Cyber Laboratory",
-      subtitle: "Tech Stack & Matrix",
-      code: "LAB-04",
-      position: { x: 32, y: 1, z: -25 },
-      color: 0x10b981,
-      type: "laboratory",
-      actionText: "Access Cyber Lab"
-    },
-    {
-      id: "contact",
-      title: "Deep Space Relay",
-      subtitle: "Communications & Socials",
-      code: "RLY-05",
-      position: { x: 0, y: 2, z: 35 },
-      color: 0xf59e0b,
-      type: "relay",
-      actionText: "Open Deep Space Relay"
+      id: "cert-pre-production",
+      title: "Pre-Production Course",
+      issuer: "CEGA",
+      topics: "Story writing, character design, storyboarding, prop design, and environment design."
     }
   ],
 
-  // Skills organized by domain
+  // Skills categorized strictly from resume
   skills: [
-    {
-      category: "Game Engines & Frameworks",
-      icon: "gamepad",
-      items: [
-        { name: "Unity", level: "Intermediate", desc: "C# scripting, component-based architecture, physics, UI Canvas" },
-        { name: "Unreal Engine", level: "Familiar", desc: "Blueprints visual scripting, level design, material graphs" },
-        { name: "Three.js / WebGL", level: "Proficient", desc: "Interactive 3D web experiences, shaders, lighting, camera rigs" }
-      ]
-    },
     {
       category: "Programming Languages",
       icon: "code",
       items: [
-        { name: "C++", level: "Core", desc: "Object-oriented design, memory management, data structures" },
-        { name: "C#", level: "Core", desc: "Gameplay programming, Unity API, event systems" },
-        { name: "JavaScript / ES6+", level: "Proficient", desc: "Modern asynchronous web apps, Web Audio, 3D math" },
-        { name: "Python", level: "Intermediate", desc: "Scripting, algorithm prototyping, automation" }
+        { name: "C#", level: "Proficient", desc: "Gameplay scripting, object-oriented systems, and Unity programming." },
+        { name: "C++", level: "Core", desc: "Algorithms, efficient data structures, custom game loops, and Minimax AI." },
+        { name: "C", level: "Foundational", desc: "Low-level programming fundamentals and procedural logic." },
+        { name: "Python", level: "Proficient", desc: "Application development, desktop GUIs with PyQt5, and web apps with Streamlit." }
       ]
     },
     {
-      category: "3D Graphics & Animation",
+      category: "Game Engines & Frameworks",
+      icon: "gamepad",
+      items: [
+        { name: "Unity", level: "Proficient", desc: "2D and 3D gameplay, VR interaction, physics, dialogue systems, and UI Toolkit." },
+        { name: "Unreal Engine", level: "Practical", desc: "Certified by CEGA. Level creation, visualization, 3D gameplay, and health systems." },
+        { name: "SDL2", level: "Core", desc: "2D graphics rendering, event handling, and game development in C++." },
+        { name: "PyQt5", level: "Proficient", desc: "Desktop application development, custom widgets, and database integration." }
+      ]
+    },
+    {
+      category: "Tools & Software",
       icon: "cube",
       items: [
-        { name: "3D Mathematics", level: "Core", desc: "Vectors, matrices, quaternions, coordinate spaces, raycasting" },
-        { name: "Blender Pipeline", level: "Intermediate", desc: "Low-poly modeling, UV unwrapping, material assignment" },
-        { name: "Character Rigging & Animation", level: "Specialization", desc: "Keyframe animation, skeletal rigs, walk cycles, blend trees" },
-        { name: "Lighting & VFX", level: "Intermediate", desc: "Particle systems, post-processing, atmospheric lighting" }
+        { name: "Blender", level: "Practical", desc: "3D animated character creation, modeling, and asset preparation for game engines." },
+        { name: "Adobe After Effects", level: "Practical", desc: "Visual motion graphics, visual effects, and post-production animation." }
       ]
     },
     {
-      category: "Tools & Methodologies",
-      icon: "wrench",
+      category: "Database & UI Skills",
+      icon: "database",
       items: [
-        { name: "Git & GitHub", level: "Proficient", desc: "Branching workflows, version control, open-source collaboration" },
-        { name: "Game Design & Prototyping", level: "Specialization", desc: "Core gameplay loops, level pacing, mechanic balancing" },
-        { name: "Vercel / Web Deployment", level: "Proficient", desc: "Continuous deployment, static web hosting" }
+        { name: "MySQL", level: "Practical", desc: "Relational database schema design and integration for application data persistence." },
+        { name: "PyQt5 UI", level: "Proficient", desc: "Desktop user interface design, custom styling, and layout management." },
+        { name: "Unity UI Toolkit", level: "Practical", desc: "In-game heads-up displays, dialog menus, and UI components." },
+        { name: "Pygame UI", level: "Practical", desc: "Interactive 2D interfaces and lightweight graphics loops." }
+      ]
+    },
+    {
+      category: "Core Competencies",
+      icon: "sparkles",
+      items: [
+        { name: "Debugging", level: "Core", desc: "Identifying root causes, resolving logic errors, and optimizing runtime stability." },
+        { name: "Problem Solving", level: "Core", desc: "Algorithmic thinking, Minimax decision trees, and efficient data structures." },
+        { name: "Idea Generation", level: "Creative", desc: "Storyboarding, character design, game concept ideation, and puzzle mechanics." }
       ]
     }
   ],
 
-  // Data-driven projects list
+  // 3D Scene Landmarks along the star path
+  landmarks: [
+    {
+      id: "about",
+      title: "About Me",
+      label: "ABOUT ME",
+      code: "LM-01",
+      subtitle: "NED University • Gaming & Animation",
+      position: { x: -6, y: 1.5, z: -35 },
+      targetZ: -30,
+      color: 0x8b5cf6,
+      glowColor: "#a855f7",
+      type: "about",
+      actionText: "Visit About Me",
+      description: "Learn about Rafia's Computer Science background at NED University, game development focus, and CEGA certifications."
+    },
+    {
+      id: "projects",
+      title: "Projects",
+      label: "PROJECTS",
+      code: "LM-02",
+      subtitle: "2D, 3D, VR, Python & C++",
+      position: { x: 7, y: 1.8, z: -75 },
+      targetZ: -70,
+      color: 0x0ea5e9,
+      glowColor: "#38bdf8",
+      type: "projects",
+      actionText: "Explore Projects Catalog",
+      description: "Explore 7 projects spanning Unity VR, Unreal Engine 3D, Unity 2D, Python apps, and C++ games."
+    },
+    {
+      id: "education",
+      title: "Education",
+      label: "EDUCATION",
+      code: "LM-03",
+      subtitle: "NED University & CEGA Certifications",
+      position: { x: -7, y: 1.5, z: -115 },
+      targetZ: -110,
+      color: 0x10b981,
+      glowColor: "#34d399",
+      type: "education",
+      actionText: "View Education & Certifications",
+      description: "Academic studies at NED University and practical certifications by CEGA."
+    },
+    {
+      id: "skills",
+      title: "Skills",
+      label: "SKILLS",
+      code: "LM-04",
+      subtitle: "Languages, Engines, Tools & DB",
+      position: { x: 6, y: 1.6, z: -155 },
+      targetZ: -150,
+      color: 0xf59e0b,
+      glowColor: "#fbbf24",
+      type: "skills",
+      actionText: "Open Skills Matrix",
+      description: "Skill breakdown across C#, C, C++, Python, Unity, Unreal Engine, Blender, and MySQL."
+    }
+  ],
+
+  // Structured Projects Catalog (Exact 7 projects from resume)
   projects: [
     {
-      id: "project-space-journey",
-      title: "Interactive 3D Space Journey",
-      category: "Web3D / Three.js",
+      id: "vr-games-hub",
+      title: "VR Games Hub",
+      category: "VR",
+      technologies: ["Unity", "VR"],
+      summary: "A VR project featuring a 3D city environment and multiple mini-games.",
+      details: "A comprehensive virtual reality project developed in Unity featuring a sprawling 3D city environment and multiple interactive mini-games.",
+      contribution: "Built the target-shooting experience, immersive environment, haptic gun feedback, a scoring system that increases on target hits and decreases on misses, and teleportation to the main scene.",
+      githubUrl: null,
+      linkedinUrl: null,
+      videoUrl: null,
+      thumbnail: null,
       featured: true,
-      tag: "Live Interactive",
-      summary: "A real-time third-person 3D planetary exploration portfolio built with Three.js, procedural atmospheric shaders, and dynamic responsive HUD.",
-      details: "Engineered from scratch using pure HTML5, CSS3, ES modules, and Three.js. Features custom third-person camera physics, smooth quaternion character rotation, interactive orbital stations, starfield particle simulations, and a grounded AI companion droid.",
-      technologies: ["Three.js", "JavaScript (ES6+)", "WebGL", "HTML5/CSS3", "Web Audio API"],
-      links: {
-        demo: "#",
-        code: "https://github.com/your-username/Personal-Portfolio"
-      },
-      stats: {
-        engine: "Three.js WebGL",
-        perspective: "Third-Person Orbit",
-        status: "Active"
-      }
+      order: 1
     },
     {
-      id: "project-gameplay-prototype",
-      title: "3D Platformer & Mechanics Prototype",
-      category: "Game Development",
+      id: "eat-right-run",
+      title: "Eat Right Run",
+      category: "3D Games",
+      technologies: ["Unreal Engine", "3D", "Blender"],
+      summary: "A level-based 3D runner about eating the right food at the right time, with a relaxing environment and health system.",
+      details: "A level-based 3D runner built in Unreal Engine about eating the right food at the right time, featuring a relaxing environment and an interactive health system dynamically affected by dietary choices.",
+      contribution: "Created an animated character in Blender, implemented core game logic, and helped debug the project.",
+      githubUrl: null,
+      linkedinUrl: null,
+      videoUrl: null,
+      thumbnail: null,
       featured: true,
-      tag: "Gameplay Mechanics",
-      summary: "A character movement and level traversal system focusing on kinetic feel, coyote-time jumping, and dynamic obstacle interaction.",
-      details: "Developed as part of Gaming & Animation studies to explore game feel, tight responsive controls, collision resolution, and state machine architecture for player character locomotion.",
-      technologies: ["C#", "Unity / Custom Engine", "3D Physics", "State Machines"],
-      links: {
-        demo: "#",
-        code: "#"
-      },
-      stats: {
-        engine: "Unity / C#",
-        mechanics: "Kinetic Locomotion",
-        status: "Prototype"
-      }
+      order: 2
     },
     {
-      id: "project-animation-study",
-      title: "Skeletal Rigging & Walk-Cycle Study",
-      category: "Animation & Modeling",
+      id: "the-parallel-eclipse",
+      title: "The Parallel Eclipse",
+      category: "2D Games",
+      technologies: ["Unity", "C#", "2D"],
+      summary: "A narrative mystery-adventure game set in a parallel world after a rare lunar eclipse.",
+      details: "A narrative mystery-adventure game set in a parallel world after a rare lunar eclipse. It features an interactive health system, combat scenes, NPC interactions, a word-scramble puzzle, and an branching dialogue system.",
+      contribution: "Implemented the dialogue system, built the starting world and level 1, and debugged game logic.",
+      githubUrl: null,
+      linkedinUrl: null,
+      videoUrl: null,
+      thumbnail: null,
       featured: true,
-      tag: "3D Animation",
-      summary: "Study on biomechanical motion, weight shifts, and kinematic transitions for bipedal and creature models.",
-      details: "Created modular skeletal rigs with inverse kinematics (IK) controls, weight painting for smooth deformation without clipping, and seamless idle-to-walk animation blend trees.",
-      technologies: ["Blender", "Rigging / IK", "Skeletal Deformation", "GLTF Pipeline"],
-      links: {
-        demo: "#",
-        code: "#"
-      },
-      stats: {
-        focus: "Biomechanical Motion",
-        format: "GLTF / FBX",
-        status: "Completed Study"
-      }
+      order: 3
     },
     {
-      id: "project-procedural-world",
-      title: "Procedural Celestial Generation",
-      category: "Graphics & Math",
+      id: "study-buddy",
+      title: "Study Buddy",
+      category: "Python Apps",
+      technologies: ["Python", "Streamlit"],
+      summary: "A student-learning web application with learner matching, summaries, AI quiz generation, and collaboration tools.",
+      details: "A student-learning web application built using Python and Streamlit with learner matching based on personality and skills, concept explanations, summaries, AI quiz generation, PDF uploads, and collaboration tools.",
+      contribution: null,
+      githubUrl: null,
+      linkedinUrl: null,
+      videoUrl: null,
+      thumbnail: null,
       featured: false,
-      tag: "3D Graphics",
-      summary: "Algorithmic generation of celestial bodies, asteroid belts, and planetary surface materials using mathematical noise functions.",
-      details: "Implemented custom noise algorithms to distribute orbital debris rings, compute surface elevations, and shade extraterrestrial atmospheres with gradient Fresnel fresnel effects.",
-      technologies: ["Three.js", "GLSL Shaders", "Procedural Math", "Particle Systems"],
-      links: {
-        demo: "#",
-        code: "#"
-      },
-      stats: {
-        technique: "Perlin/Simplex Noise",
-        performance: "60 FPS WebGL",
-        status: "Research"
-      }
+      order: 4
+    },
+    {
+      id: "study-planner-tracker",
+      title: "Study Planner and Tracker App",
+      category: "Python Apps",
+      technologies: ["Python", "PyQt5", "MySQL"],
+      summary: "A desktop study planner with flashcards, notes, to-do lists, and an AI-powered chatbot for study questions.",
+      details: "A desktop study planner application built with Python, PyQt5, and MySQL, featuring flashcards, notes, to-do lists, and an AI-powered chatbot for answering study questions.",
+      contribution: "Built a feature-rich to-do list with options for tasks, topics, and subjects.",
+      githubUrl: null,
+      linkedinUrl: null,
+      videoUrl: null,
+      thumbnail: null,
+      featured: false,
+      order: 5
+    },
+    {
+      id: "cherrysweeper",
+      title: "Cherrysweeper",
+      category: "C++ Games",
+      technologies: ["C++", "SDL2"],
+      summary: "A Minesweeper-style game for a C++ game suite, with efficient data structures and real-time scoring.",
+      details: "A Minesweeper-style game developed as part of a C++ game suite, implemented with efficient data structures, recursive algorithms, real-time scoring, and an active timer.",
+      contribution: null,
+      githubUrl: null,
+      linkedinUrl: null,
+      videoUrl: null,
+      thumbnail: null,
+      featured: false,
+      order: 6
+    },
+    {
+      id: "tic-tac-toe",
+      title: "Tic Tac Toe",
+      category: "C++ Games",
+      technologies: ["C++"],
+      summary: "A game built with object-oriented programming, a Minimax AI opponent, and a two-player mode.",
+      details: "A strategic game built using object-oriented programming in C++, featuring an unbeatable Minimax AI opponent algorithm alongside a local two-player mode.",
+      contribution: null,
+      githubUrl: null,
+      linkedinUrl: null,
+      videoUrl: null,
+      thumbnail: null,
+      featured: false,
+      order: 7
     }
   ]
 };
