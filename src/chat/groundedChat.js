@@ -55,13 +55,8 @@ export class GroundedChat {
     // Initial welcome message explaining RAG scope
     this.addBotMessage({
       answer: `Hello! I am **ASTRA**, Rafia Gull's grounded AI portfolio companion.\n\n` +
-        `I use real-time **Retrieval-Augmented Generation (RAG)** grounded strictly on verified information from Rafia's resume.\n\n` +
-        `You can ask me about:\n` +
-        `• **7 Featured Projects** (*VR Games Hub, Eat Right Run, The Parallel Eclipse, Study Buddy, Study Planner, Cherrysweeper, Tic Tac Toe*)\n` +
-        `• **Academic Background** (*NED University, Gaming and Animation specialization*)\n` +
-        `• **CEGA Certifications** (*Unreal Course & Pre-Production Course*)\n` +
-        `• **Technical Skills** (*Unity, Unreal Engine, C++, C#, Python, Blender, MySQL*)\n\n` +
-        `*Every response includes citations pointing to the exact portfolio sources.*`,
+        `I use real-time **Retrieval-Augmented Generation (RAG)** grounded strictly on verified information from Rafia's resume.\n\n`
+      ,
       sources: []
     });
   }

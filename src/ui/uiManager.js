@@ -224,7 +224,7 @@ export class UIManager {
       ${certs.map(c => `
         <div class="edu-card" style="margin-bottom:0.75rem;">
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h4 style="font-size:0.95rem; color:#fff;">${c.title}</h4>
+            <h4 style="font-size:0.95rem; color:var(--text-strong);">${c.title}</h4>
             <span class="edu-badge">Certified by ${c.issuer}</span>
           </div>
           <p style="margin-top:0.4rem; font-size:0.84rem; color:var(--text-muted);">${c.topics}</p>

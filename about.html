@@ -7,6 +7,7 @@
   <meta name="description"
     content="About Rafia Gull - Aspiring Game Developer & Computer Science Student in Gaming & Animation at NED University." />
   <title>About Me | Rafia Gull - Game Developer</title>
+  <script src="./src/theme/themeManager.js"></script>
   <link rel="stylesheet" href="./styles/style.css" />
 </head>
 
@@ -32,6 +33,11 @@
       </ul>
     </nav>
 
+    <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark theme" aria-describedby="theme-status" data-theme-toggle>
+      <span class="theme-orbit" aria-hidden="true"><span class="theme-orbit-planet"></span><span class="theme-star one"></span><span class="theme-star two"></span><span class="theme-star three"></span></span>
+      <span class="theme-thumb" aria-hidden="true"></span>
+    </button>
+    <span id="theme-status" class="sr-only" role="status" aria-live="polite" data-theme-status></span>
     <button id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">&#9776;</button>
   </header>
 

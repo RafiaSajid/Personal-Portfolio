@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <meta name="description" content="Projects by Rafia Gull - VR, 3D, 2D games, and software built with Unity, Unreal Engine, C++, and Python." />
   <title>Projects | Rafia Gull - Game Developer</title>
+  <script src="./src/theme/themeManager.js"></script>
   <link rel="stylesheet" href="./styles/style.css" />
 </head>
 <body class="page-mode">
@@ -29,6 +30,11 @@
       </ul>
     </nav>
 
+    <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark theme" aria-describedby="theme-status" data-theme-toggle>
+      <span class="theme-orbit" aria-hidden="true"><span class="theme-orbit-planet"></span><span class="theme-star one"></span><span class="theme-star two"></span><span class="theme-star three"></span></span>
+      <span class="theme-thumb" aria-hidden="true"></span>
+    </button>
+    <span id="theme-status" class="sr-only" role="status" aria-live="polite" data-theme-status></span>
     <button id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">&#9776;</button>
   </header>
 
@@ -79,7 +85,7 @@
       <div class="project-modal-header">
         <div>
           <span class="card-tag" id="modal-proj-category">CATEGORY</span>
-          <h2 id="modal-proj-title" style="margin-top:0.4rem; color:#fff;">Project Title</h2>
+          <h2 id="modal-proj-title" style="margin-top:0.4rem; color:var(--text-strong);">Project Title</h2>
         </div>
         <button id="close-detail-modal" class="modal-close-btn" aria-label="Close Project Details">&times;</button>
       </div>
@@ -91,13 +97,13 @@
         <!-- Description -->
         <div class="detail-section">
           <h3>PROJECT OVERVIEW</h3>
-          <p id="modal-proj-details" style="color:#cbd5e1; line-height:1.65;"></p>
+          <p id="modal-proj-details" style="color:var(--text-muted); line-height:1.65;"></p>
         </div>
 
         <!-- Contribution Section (if present) -->
         <div id="modal-contribution-section" class="detail-section" style="display:none;">
           <h3 style="color:var(--emerald);">KEY CONTRIBUTION</h3>
-          <p id="modal-proj-contribution" style="color:#e2e8f0; line-height:1.6;"></p>
+          <p id="modal-proj-contribution" style="color:var(--text); line-height:1.6;"></p>
         </div>
 
         <!-- Technologies -->
@@ -190,7 +196,7 @@
           ${p.contribution ? `
             <div class="card-contribution-preview">
               <strong style="color:var(--emerald); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.04em;">Contribution:</strong>
-              <p style="font-size:0.8rem; color:#cbd5e1; margin-top:0.2rem; line-height:1.4;">${escapeHTML(p.contribution)}</p>
+              <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem; line-height:1.4;">${escapeHTML(p.contribution)}</p>
             </div>
           ` : ''}
 

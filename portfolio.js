@@ -7,6 +7,11 @@ import { AudioManager } from './src/audio/audioManager.js';
 import { GroundedChat } from './src/chat/groundedChat.js';
 import { UIManager } from './src/ui/uiManager.js';
 
+const THEME_COLOR_KEYS = new Set([
+  'background', 'fog', 'ambientColor', 'sunColor', 'rimColor', 'pathColor', 'guideColor',
+  'platformColor', 'planetA', 'planetAHalo', 'planetB', 'planetBRing', 'planetC', 'asteroid'
+]);
+
 class PortfolioApp {
   constructor() {
     this.container = document.getElementById('canvas-wrap') || document.body;
@@ -21,6 +26,7 @@ class PortfolioApp {
     this.initRenderer();
     this.initScene();
     this.initModules();
+    this.connectTheme();
     this.initRaycasting();
     this.initEvents();
 
@@ -103,6 +109,71 @@ class PortfolioApp {
     this.ui = new UIManager(this.avatar, this.audio, this.chat);
   }
 
+  connectTheme() {
+    this.themeManager = window.portfolioTheme;
+    if (!this.themeManager) return;
+
+    this.unsubscribeTheme = this.themeManager.subscribe((_name, palette) => {
+      const target = this.cloneTheme(palette.three);
+      if (!this.activeSceneTheme || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        this.applySceneTheme(target);
+        this.activeSceneTheme = target;
+        this.themeTransition = null;
+        return;
+      }
+
+      this.themeTransition = {
+        from: this.cloneTheme(this.activeSceneTheme),
+        to: target,
+        startedAt: performance.now(),
+        duration: 260
+      };
+    });
+  }
+
+  cloneTheme(theme) {
+    return Object.fromEntries(Object.entries(theme).map(([key, value]) => [
+      key,
+      Array.isArray(value) ? [...value] : value
+    ]));
+  }
+
+  applySceneTheme(theme) {
+    this.scene.background.setHex(theme.background);
+    if (this.scene.fog) {
+      this.scene.fog.color.setHex(theme.fog);
+      this.scene.fog.density = theme.fogDensity;
+    }
+    this.spaceScene.applyTheme(theme);
+    this.landmarks.applyTheme(theme);
+  }
+
+  updateThemeTransition() {
+    if (!this.themeTransition) return;
+    const transition = this.themeTransition;
+    const rawProgress = Math.min(1, (performance.now() - transition.startedAt) / transition.duration);
+    const progress = 1 - Math.pow(1 - rawProgress, 3);
+    const interpolated = {};
+
+    Object.keys(transition.to).forEach((key) => {
+      const from = transition.from[key];
+      const to = transition.to[key];
+      if (Array.isArray(to)) {
+        interpolated[key] = to.map((color, index) => new THREE.Color(from[index]).lerp(new THREE.Color(color), progress).getHex());
+      } else if (THEME_COLOR_KEYS.has(key)) {
+        interpolated[key] = new THREE.Color(from).lerp(new THREE.Color(to), progress).getHex();
+      } else if (typeof to === 'number') {
+        interpolated[key] = from + (to - from) * progress;
+      } else {
+        interpolated[key] = to;
+      }
+    });
+
+    this.applySceneTheme(interpolated);
+    this.activeSceneTheme = interpolated;
+    if (rawProgress >= 1) this.themeTransition = null;
+  }
+
   initRaycasting() {
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
@@ -149,6 +220,7 @@ class PortfolioApp {
     requestAnimationFrame(() => this.animate());
 
     const delta = Math.min(this.clock.getDelta(), 0.1);
+    this.updateThemeTransition();
 
     // 1. Update avatar locomotion and third-person camera
     this.avatar.update(delta, this.input);

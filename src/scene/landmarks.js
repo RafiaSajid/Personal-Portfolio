@@ -49,6 +49,7 @@ export class LandmarkManager {
         data,
         group,
         visuals,
+        platform,
         labelSprite,
         pulseRing,
         activationRadius: 9.5
@@ -107,7 +108,7 @@ export class LandmarkManager {
     const ctx = canvas.getContext('2d');
 
     // High contrast backdrop pill
-    ctx.fillStyle = 'rgba(6, 11, 26, 0.88)';
+    ctx.fillStyle = window.portfolioTheme?.palette?.three?.labelBackground || 'rgba(6, 11, 26, 0.9)';
     ctx.roundRect(16, 16, 480, 128, 24);
     ctx.fill();
 
@@ -122,7 +123,7 @@ export class LandmarkManager {
     ctx.fillText(`★ ${code}`, 42, 54);
 
     // Main landmark title
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = window.portfolioTheme?.palette?.three?.labelText || '#ffffff';
     ctx.font = 'bold 38px "Segoe UI", sans-serif';
     ctx.fillText(title, 42, 108);
 
@@ -136,7 +137,44 @@ export class LandmarkManager {
     });
     const sprite = new THREE.Sprite(spriteMat);
     sprite.scale.set(6.2, 1.9, 1);
+    sprite.userData.label = { code, title, color: hexColor };
     return sprite;
+  }
+
+  applyTheme(theme) {
+    if (!theme) return;
+    this.themePulseOpacity = theme.pulseOpacity;
+    this.themeActivePulseOpacity = theme.activePulseOpacity;
+    const labelAppearance = `${theme.labelBackground}|${theme.labelText}`;
+    const redrawLabels = labelAppearance !== this.labelAppearance;
+    this.landmarks.forEach((item) => {
+      item.platform.material.color.setHex(theme.platformColor);
+      item.platform.material.roughness = theme.platformRoughness;
+      item.platform.material.metalness = theme.platformMetalness;
+
+      if (redrawLabels) {
+        const texture = item.labelSprite.material.map;
+        const ctx = texture.image.getContext('2d');
+        ctx.clearRect(0, 0, 512, 160);
+        ctx.fillStyle = theme.labelBackground;
+        ctx.beginPath();
+        ctx.roundRect(16, 16, 480, 128, 24);
+        ctx.fill();
+        const label = item.labelSprite.userData.label;
+        const colorStr = '#' + label.color.toString(16).padStart(6, '0');
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = colorStr;
+        ctx.stroke();
+        ctx.fillStyle = colorStr;
+        ctx.font = 'bold 22px "Segoe UI", sans-serif';
+        ctx.fillText(`\u2605 ${label.code}`, 42, 54);
+        ctx.fillStyle = theme.labelText;
+        ctx.font = 'bold 38px "Segoe UI", sans-serif';
+        ctx.fillText(label.title, 42, 108);
+        texture.needsUpdate = true;
+      }
+    });
+    this.labelAppearance = labelAppearance;
   }
 
   // Landmark 1: ABOUT ME (Violet Gyroscopic Star)
@@ -355,7 +393,9 @@ export class LandmarkManager {
       // Pulse ground ring
       if (item.pulseRing) {
         const isNear = dist <= item.activationRadius;
-        item.pulseRing.material.opacity = isNear ? 0.75 : 0.35;
+        item.pulseRing.material.opacity = isNear
+          ? (this.themeActivePulseOpacity ?? 0.75)
+          : (this.themePulseOpacity ?? 0.35);
         item.pulseRing.scale.setScalar(1.0 + Math.sin(this.time * 2.5 + item.data.position.z) * 0.08);
       }
 

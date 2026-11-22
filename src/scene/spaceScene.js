@@ -9,6 +9,8 @@ export class SpaceScene {
     this.planets = [];
     this.asteroids = [];
     this.nebulaPlanes = [];
+    this.pathGuideMaterials = [];
+    this.themePathOpacity = 0.7;
     this.time = 0;
 
     this.init();
@@ -25,19 +27,19 @@ export class SpaceScene {
 
   setupLighting() {
     // Deep cosmic ambient light
-    const ambientLight = new THREE.AmbientLight(0x0e1428, 1.6);
-    this.scene.add(ambientLight);
+    this.ambientLight = new THREE.AmbientLight(0x0e1428, 1.6);
+    this.scene.add(this.ambientLight);
 
     // Primary distant stellar light
-    const sunLight = new THREE.DirectionalLight(0xdbeafe, 2.0);
-    sunLight.position.set(40, 60, 30);
-    sunLight.castShadow = true;
-    this.scene.add(sunLight);
+    this.sunLight = new THREE.DirectionalLight(0xdbeafe, 2.0);
+    this.sunLight.position.set(40, 60, 30);
+    this.sunLight.castShadow = true;
+    this.scene.add(this.sunLight);
 
     // Subtle violet rim light from deep space
-    const rimLight = new THREE.DirectionalLight(0x7c3aed, 1.2);
-    rimLight.position.set(-50, -20, -100);
-    this.scene.add(rimLight);
+    this.rimLight = new THREE.DirectionalLight(0x7c3aed, 1.2);
+    this.rimLight.position.set(-50, -20, -100);
+    this.scene.add(this.rimLight);
   }
 
   setupStarfield() {
@@ -80,14 +82,14 @@ export class SpaceScene {
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-    const starMaterial = new THREE.PointsMaterial({
+    this.starMaterial = new THREE.PointsMaterial({
       size: 1.5,
       vertexColors: true,
       transparent: true,
       opacity: 0.85
     });
 
-    this.stars = new THREE.Points(geometry, starMaterial);
+    this.stars = new THREE.Points(geometry, this.starMaterial);
     this.scene.add(this.stars);
   }
 
@@ -158,6 +160,7 @@ export class SpaceScene {
 
     const leftLine = new THREE.Line(leftLineGeo, guideLineMat);
     const rightLine = new THREE.Line(rightLineGeo, guideLineMat);
+    this.pathGuideMaterials.push(guideLineMat);
     pathGroup.add(leftLine);
     pathGroup.add(rightLine);
 
@@ -205,6 +208,7 @@ export class SpaceScene {
       opacity: 0.12,
       side: THREE.BackSide
     });
+    this.themeMaterials = { planetA: planetAMat, planetAHalo: haloMat };
     planetAGroup.add(new THREE.Mesh(haloGeo, haloMat));
     this.scene.add(planetAGroup);
     this.planets.push(planetAGroup);
@@ -230,6 +234,8 @@ export class SpaceScene {
       transparent: true,
       opacity: 0.35
     });
+    this.themeMaterials.planetB = planetBMat;
+    this.themeMaterials.planetBRing = ringMat;
     planetBGroup.add(new THREE.Mesh(ringGeo, ringMat));
     this.scene.add(planetBGroup);
     this.planets.push(planetBGroup);
@@ -243,6 +249,7 @@ export class SpaceScene {
       roughness: 0.9,
       metalness: 0.05
     });
+    this.themeMaterials.planetC = planetCMat;
     planetCGroup.add(new THREE.Mesh(planetCGeo, planetCMat));
     this.scene.add(planetCGroup);
     this.planets.push(planetCGroup);
@@ -256,6 +263,7 @@ export class SpaceScene {
       roughness: 0.85,
       metalness: 0.2
     });
+    this.themeMaterials.asteroid = asteroidMat;
 
     for (let i = 0; i < 24; i++) {
       const geo = new THREE.DodecahedronGeometry(0.8 + Math.random() * 1.4, 0);
@@ -297,6 +305,7 @@ export class SpaceScene {
         side: THREE.DoubleSide,
         depthWrite: false
       });
+      mat.userData.themeNebulaIndex = i % 2;
       const plane = new THREE.Mesh(geo, mat);
       plane.position.set(
         (Math.random() - 0.5) * 50,
@@ -343,7 +352,7 @@ export class SpaceScene {
       }
 
       const pulse = Math.sin(this.time * 3 + cluster.phase) * 0.2 + 0.8;
-      cluster.points.material.opacity = Math.min(1.0, 0.7 * pulse * proximityFactor);
+      cluster.points.material.opacity = Math.min(1.0, this.themePathOpacity * pulse * proximityFactor);
     });
 
     // 4. Distant celestial body rotations
@@ -355,6 +364,38 @@ export class SpaceScene {
     this.asteroids.forEach((a) => {
       a.mesh.rotation.x += a.rotSpeedX * delta;
       a.mesh.rotation.y += a.rotSpeedY * delta;
+    });
+  }
+
+  applyTheme(theme) {
+    if (!theme) return;
+    this.ambientLight.color.setHex(theme.ambientColor);
+    this.ambientLight.intensity = theme.ambientIntensity;
+    this.sunLight.color.setHex(theme.sunColor);
+    this.sunLight.intensity = theme.sunIntensity;
+    this.rimLight.color.setHex(theme.rimColor);
+    this.rimLight.intensity = theme.rimIntensity;
+
+    this.starMaterial.opacity = theme.starOpacity;
+    this.themePathOpacity = theme.pathOpacity;
+    this.pathClusters.forEach(({ points }) => points.material.color.setHex(theme.pathColor));
+    this.pathGuideMaterials.forEach((material) => {
+      material.color.setHex(theme.guideColor);
+      material.opacity = theme.guideOpacity;
+    });
+
+    const materials = this.themeMaterials || {};
+    if (materials.planetA) materials.planetA.color.setHex(theme.planetA);
+    if (materials.planetAHalo) materials.planetAHalo.color.setHex(theme.planetAHalo);
+    if (materials.planetB) materials.planetB.color.setHex(theme.planetB);
+    if (materials.planetBRing) materials.planetBRing.color.setHex(theme.planetBRing);
+    if (materials.planetC) materials.planetC.color.setHex(theme.planetC);
+    if (materials.asteroid) materials.asteroid.color.setHex(theme.asteroid);
+
+    this.nebulaPlanes.forEach((plane) => {
+      const index = plane.material.userData.themeNebulaIndex || 0;
+      plane.material.color.setHex(theme.nebula[index]);
+      plane.material.opacity = theme.nebulaOpacity;
     });
   }
 }
