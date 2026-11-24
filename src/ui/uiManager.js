@@ -1,4 +1,4 @@
-import { portfolioData } from '../data/portfolioData.js';
+import { portfolioData, skillOrbitGroups } from '../data/portfolioData.js';
 
 export class UIManager {
   constructor(avatarController, audioManager, groundedChat) {
@@ -14,6 +14,7 @@ export class UIManager {
     this.loadingScreen = document.getElementById('loading-screen');
     this.loadingMsg = document.getElementById('loading-message');
     this.coordDisplay = document.getElementById('hud-coords');
+    this.debugScene = document.documentElement.classList.contains('debug-scene');
     this.interactionHint = document.getElementById('interaction-hint');
     this.hintText = document.getElementById('hint-text');
 
@@ -27,6 +28,16 @@ export class UIManager {
     // Navigation & Hamburger
     this.navToggle = document.getElementById('nav-toggle');
     this.navMobile = document.getElementById('nav-mobile');
+    this.nearbySkillGroup = null;
+    window.addEventListener('portfolio:skill-approach', (event) => {
+      this.nearbySkillGroup = Number.isInteger(event.detail?.index) ? event.detail.index : null;
+      if (this.activePanel !== 'skills' || this.nearbySkillGroup === null) return;
+      this.panelBody?.querySelector(`[data-skill-group="${this.nearbySkillGroup}"]`)?.click();
+    });
+    window.addEventListener('portfolio:skill-focus', (event) => {
+      const { x, y, z } = event.detail || {};
+      if ([x, y, z].every(Number.isFinite)) this.avatar.focusCameraOn?.(x, y, z);
+    });
 
     this.init();
   }
@@ -56,8 +67,10 @@ export class UIManager {
       link.addEventListener('click', (e) => {
         e.preventDefault();
         const target = link.getAttribute('data-nav');
+        this.setActiveNavigation(target);
         this.navigateToSection(target);
         if (this.navMobile) this.navMobile.classList.remove('open');
+        this.navToggle?.setAttribute('aria-expanded', 'false');
       });
     });
 
@@ -67,6 +80,18 @@ export class UIManager {
         this.navToggle.setAttribute('aria-expanded', isOpen);
       });
     }
+  }
+
+  setActiveNavigation(sectionId) {
+    document.querySelectorAll('[data-nav]').forEach((link) => {
+      if (link.closest('#nav-mobile')) return;
+      if (link.getAttribute('data-nav') === sectionId) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+    document.querySelectorAll('#nav-mobile [data-nav]').forEach((link) => {
+      if (link.getAttribute('data-nav') === sectionId) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
   }
 
   checkInitialHash() {
@@ -80,15 +105,17 @@ export class UIManager {
     }
   }
 
-  navigateToSection(sectionId) {
+  navigateToSection(sectionId, skillGroupIndex = null) {
     if (sectionId === 'home') {
       this.closePanel();
       this.chat?.close();
+      this.avatar.clearCameraFocus?.();
       this.avatar.warpTo(0, 0, 4, Math.PI);
       return;
     }
 
     if (sectionId === 'chat') {
+      this.avatar.clearCameraFocus?.();
       this.closePanel();
       this.chat?.open();
       return;
@@ -96,6 +123,7 @@ export class UIManager {
 
     const lm = portfolioData.landmarks.find(l => l.id === sectionId);
     if (!lm) return;
+    if (sectionId !== 'skills') this.avatar.clearCameraFocus?.();
 
     this.audio?.playUISound('warp');
 
@@ -103,11 +131,11 @@ export class UIManager {
     const targetZ = lm.targetZ || lm.position.z + 4.0;
 
     this.avatar.transitionTo(targetX, targetZ, 1.4, () => {
-      this.executeSectionAction(sectionId);
+      this.executeSectionAction(sectionId, skillGroupIndex);
     });
   }
 
-  executeSectionAction(landmarkId) {
+  executeSectionAction(landmarkId, skillGroupIndex = null) {
     if (landmarkId === 'about') {
       window.location.href = './about.html';
     } else if (landmarkId === 'projects') {
@@ -115,7 +143,11 @@ export class UIManager {
     } else if (landmarkId === 'education') {
       this.openPanel('education');
     } else if (landmarkId === 'skills') {
-      this.openPanel('skills');
+      const skillLandmark = portfolioData.landmarks.find((landmark) => landmark.id === 'skills');
+      if (skillLandmark) {
+        this.avatar.focusCameraOn?.(skillLandmark.position.x, skillLandmark.position.y, skillLandmark.position.z);
+      }
+      this.openPanel('skills', skillGroupIndex ?? 0);
     }
   }
 
@@ -177,9 +209,12 @@ export class UIManager {
     }
   }
 
-  openPanel(panelId) {
+  openPanel(panelId, selectedSkillGroup = null) {
     this.activePanel = panelId;
     this.audio?.playUISound('open');
+    this.contentPanel?.classList.toggle('skills-open', panelId === 'skills');
+    this.panelBackdrop?.classList.toggle('skills-open', panelId === 'skills');
+    if (this.contentPanel) this.contentPanel.dataset.panelType = panelId;
 
     if (panelId === 'education') {
       this.panelTitle.textContent = 'EDUCATION & CERTIFICATIONS';
@@ -187,6 +222,24 @@ export class UIManager {
     } else if (panelId === 'skills') {
       this.panelTitle.textContent = 'SKILLS // TECHNICAL MATRIX';
       this.panelBody.innerHTML = this.renderSkillsHTML();
+      this.panelBody.querySelectorAll('[data-skill-group]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const selectedIndex = button.dataset.skillGroup;
+          this.panelBody.querySelectorAll('[data-skill-group]').forEach((item) => {
+            const selected = item === button;
+            item.classList.toggle('is-selected', selected);
+            item.setAttribute('aria-pressed', String(selected));
+          });
+          this.panelBody.querySelectorAll('[data-skill-panel]').forEach((panel) => {
+            const selected = panel.dataset.skillPanel === selectedIndex;
+            panel.hidden = !selected;
+            panel.classList.toggle('is-selected', selected);
+          });
+          window.dispatchEvent(new CustomEvent('portfolio:skill-select', { detail: { index: Number(selectedIndex) } }));
+        });
+      });
+      const activeGroup = selectedSkillGroup ?? this.nearbySkillGroup ?? 0;
+      this.panelBody.querySelector(`[data-skill-group="${activeGroup}"]`)?.click();
     }
 
     this.panelBackdrop?.classList.add('open');
@@ -198,7 +251,9 @@ export class UIManager {
     this.activePanel = null;
     this.audio?.playUISound('close');
     this.panelBackdrop?.classList.remove('open');
+    this.panelBackdrop?.classList.remove('skills-open');
     this.contentPanel?.classList.remove('open');
+    this.contentPanel?.classList.remove('skills-open');
   }
 
   renderEducationHTML() {
@@ -234,25 +289,42 @@ export class UIManager {
   }
 
   renderSkillsHTML() {
-    const skills = portfolioData.skills;
-    return skills.map(cat => `
-      <section class="skill-category">
-        <h3>${cat.category}</h3>
-        <div class="skills-grid">
-          ${cat.items.map(item => `
-            <div class="skill-chip">
-              <span class="skill-chip-name">${item.name}</span>
-              <span class="skill-chip-level">${item.level}</span>
-              <p style="font-size:0.75rem; color:var(--text-muted); line-height:1.4; margin-top:0.2rem;">${item.desc}</p>
-            </div>
-          `).join('')}
-        </div>
+    const allSkills = portfolioData.skills.flatMap(group => group.items);
+    const skillByName = new Map(allSkills.map(skill => [skill.name, skill]));
+    const groups = skillOrbitGroups.map(group => ({
+      ...group,
+      skills: group.names.map(name => skillByName.get(name)).filter(Boolean)
+    }));
+
+    const groupButtons = groups.map((group, index) => `
+      <button class="skill-selector-button${index === 0 ? ' is-selected' : ''}" type="button"
+        data-skill-group="${index}" aria-pressed="${index === 0}">
+        <span class="skill-selector-marker" aria-hidden="true"></span><span>${group.label}</span>
+      </button>
+    `).join('');
+
+    const groupPanels = groups.map((group, index) => `
+      <section class="skill-group-panel${index === 0 ? ' is-selected' : ''}" data-skill-panel="${index}"${index === 0 ? '' : ' hidden'}>
+        <h3>${group.label}</h3>
+        <ul>${group.skills.map(skill => `<li><strong>${skill.name}</strong><span>${skill.desc}</span></li>`).join('')}</ul>
       </section>
     `).join('');
+
+    return `
+      <div class="skills-experience">
+        <p class="skills-intro">Select a planet in the scene or choose a skill group here.</p>
+        <div class="skills-layout">
+          <nav class="skills-selector" aria-label="Skill groups">
+            ${groupButtons}
+          </nav>
+          <div class="skills-detail" aria-live="polite">${groupPanels}</div>
+        </div>
+      </div>
+    `;
   }
 
   updateHUD(avatarPos, orbitYaw) {
-    if (this.coordDisplay) {
+    if (this.debugScene && this.coordDisplay) {
       const z = avatarPos.z.toFixed(1);
       const x = avatarPos.x.toFixed(1);
       this.coordDisplay.textContent = `STAR PATH // X: ${x} | Z: ${z}`;

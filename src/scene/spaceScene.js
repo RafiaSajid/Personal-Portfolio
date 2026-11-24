@@ -26,7 +26,7 @@ export class SpaceScene {
   }
 
   setupLighting() {
-    // Deep cosmic ambient light
+    // Low-key illumination keeps the path readable without flattening the sky.
     this.ambientLight = new THREE.AmbientLight(0x0e1428, 1.6);
     this.scene.add(this.ambientLight);
 
@@ -36,26 +36,25 @@ export class SpaceScene {
     this.sunLight.castShadow = true;
     this.scene.add(this.sunLight);
 
-    // Subtle violet rim light from deep space
-    this.rimLight = new THREE.DirectionalLight(0x7c3aed, 1.2);
+    // Cool edge light gives the planets shape without a purple wash.
+    this.rimLight = new THREE.DirectionalLight(0x274663, 0.8);
     this.rimLight.position.set(-50, -20, -100);
     this.scene.add(this.rimLight);
   }
 
   setupStarfield() {
-    // 2500 distant background stars with subtle twinkle colors
-    const starCount = 2500;
+    // A restrained star field with varied color and soft, round points.
+    const starCount = 1450;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(starCount * 3);
     const colors = new Float32Array(starCount * 3);
     this.starColorsOriginal = new Float32Array(starCount * 3);
 
     const palette = [
-      new THREE.Color(0xffffff),
-      new THREE.Color(0x38bdf8),
-      new THREE.Color(0xa855f7),
-      new THREE.Color(0xfef08a),
-      new THREE.Color(0x67e8f9)
+      new THREE.Color(0xe9f2ff),
+      new THREE.Color(0x8fc9e5),
+      new THREE.Color(0xf2d6a2),
+      new THREE.Color(0xc3d7e4)
     ];
 
     for (let i = 0; i < starCount; i++) {
@@ -63,7 +62,7 @@ export class SpaceScene {
       const v = Math.random();
       const theta = u * 2.0 * Math.PI;
       const phi = Math.acos(2.0 * v - 1.0);
-      const radius = 220 + Math.random() * 200;
+      const radius = 250 + Math.random() * 220;
 
       positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
       positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
@@ -83,10 +82,13 @@ export class SpaceScene {
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
     this.starMaterial = new THREE.PointsMaterial({
-      size: 1.5,
+      map: this.createGlowParticleTexture(),
+      size: 1.05,
       vertexColors: true,
       transparent: true,
-      opacity: 0.85
+      opacity: 0.78,
+      alphaTest: 0.08,
+      depthWrite: false
     });
 
     this.stars = new THREE.Points(geometry, this.starMaterial);
@@ -104,25 +106,25 @@ export class SpaceScene {
 
     const clusterMaterial = new THREE.PointsMaterial({
       map: particleTexture,
-      size: 1.4,
+      size: 0.66,
       transparent: true,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
-      color: 0x38bdf8,
-      opacity: 0.85
+      color: 0xd4e9f5,
+      opacity: 0.78,
+      alphaTest: 0.08
     });
 
-    // Create clusters spaced every 3.5 units along the path
-    for (let z = 12; z >= -180; z -= 3.5) {
-      const count = 10;
+    // Small, close-spaced star clusters form one continuous walkable route.
+    for (let z = 12; z >= -180; z -= 3.0) {
+      const count = 7;
       const positions = new Float32Array(count * 3);
 
       for (let i = 0; i < count; i++) {
-        // Path width: lateral spread between -3.8 and +3.8
-        const x = (Math.random() - 0.5) * 7.5;
-        // Floor level with gentle undulation
-        const y = -0.05 + Math.random() * 0.15;
-        const zOffset = (Math.random() - 0.5) * 2.8;
+        const centerline = Math.sin(z * 0.035) * 0.52;
+        const x = centerline + (Math.random() - 0.5) * 3.1;
+        const y = 0.015 + Math.random() * 0.08;
+        const zOffset = (Math.random() - 0.5) * 1.2;
 
         positions[i * 3] = x;
         positions[i * 3 + 1] = y;
@@ -131,7 +133,10 @@ export class SpaceScene {
 
       const geo = new THREE.BufferGeometry();
       geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      const points = new THREE.Points(geo, clusterMaterial.clone());
+      const material = clusterMaterial.clone();
+      material.color.setHex([0xd4e9f5, 0x78bad7, 0xe8d1a1][Math.floor(Math.random() * 3)]);
+      material.size = 0.55 + Math.random() * 0.22;
+      const points = new THREE.Points(geo, material);
 
       pathGroup.add(points);
       this.pathClusters.push({
@@ -146,16 +151,16 @@ export class SpaceScene {
     const linePointsLeft = [];
     const linePointsRight = [];
     for (let z = 12; z >= -180; z -= 2) {
-      linePointsLeft.push(new THREE.Vector3(-4.2, 0.02, z));
-      linePointsRight.push(new THREE.Vector3(4.2, 0.02, z));
+      linePointsLeft.push(new THREE.Vector3(-2.8, -0.02, z));
+      linePointsRight.push(new THREE.Vector3(2.8, -0.02, z));
     }
     const leftLineGeo = new THREE.BufferGeometry().setFromPoints(linePointsLeft);
     const rightLineGeo = new THREE.BufferGeometry().setFromPoints(linePointsRight);
 
     const guideLineMat = new THREE.LineBasicMaterial({
-      color: 0x0284c7,
+      color: 0x39758f,
       transparent: true,
-      opacity: 0.35
+      opacity: 0.13
     });
 
     const leftLine = new THREE.Line(leftLineGeo, guideLineMat);
@@ -175,9 +180,9 @@ export class SpaceScene {
 
     const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
     grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    grad.addColorStop(0.3, 'rgba(56, 189, 248, 0.8)');
-    grad.addColorStop(0.7, 'rgba(14, 165, 233, 0.25)');
-    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    grad.addColorStop(0.22, 'rgba(255, 255, 255, 0.92)');
+    grad.addColorStop(0.56, 'rgba(255, 255, 255, 0.4)');
+    grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 64, 64);
@@ -187,23 +192,21 @@ export class SpaceScene {
   }
 
   setupPlanets() {
-    // 3 distant celestial bodies placed intentionally to provide depth and atmosphere
-    // 1. Planet A: Indigo gas giant to the left
+    // Three distant bodies provide scale without filling the camera view.
     const planetAGroup = new THREE.Group();
-    planetAGroup.position.set(-95, 38, -90);
-    const planetAGeo = new THREE.SphereGeometry(18, 32, 32);
+    planetAGroup.position.set(-58, 24, -96);
+    const planetAGeo = new THREE.SphereGeometry(8, 32, 32);
     const planetAMat = new THREE.MeshStandardMaterial({
-      color: 0x312e81,
+      color: 0x18364a,
       roughness: 0.8,
       metalness: 0.1
     });
     const planetAMesh = new THREE.Mesh(planetAGeo, planetAMat);
     planetAGroup.add(planetAMesh);
 
-    // Violet atmospheric halo
-    const haloGeo = new THREE.SphereGeometry(19.5, 32, 32);
+    const haloGeo = new THREE.SphereGeometry(8.8, 32, 32);
     const haloMat = new THREE.MeshBasicMaterial({
-      color: 0xa855f7,
+      color: 0x3e8195,
       transparent: true,
       opacity: 0.12,
       side: THREE.BackSide
@@ -213,12 +216,11 @@ export class SpaceScene {
     this.scene.add(planetAGroup);
     this.planets.push(planetAGroup);
 
-    // 2. Planet B: Cyan exoplanet with rings to the right
     const planetBGroup = new THREE.Group();
-    planetBGroup.position.set(100, 24, -130);
-    const planetBGeo = new THREE.SphereGeometry(14, 32, 32);
+    planetBGroup.position.set(58, 17, -154);
+    const planetBGeo = new THREE.SphereGeometry(6, 32, 32);
     const planetBMat = new THREE.MeshStandardMaterial({
-      color: 0x164e63,
+      color: 0x23434e,
       roughness: 0.7,
       metalness: 0.2
     });
@@ -226,13 +228,13 @@ export class SpaceScene {
     planetBGroup.add(planetBMesh);
 
     // Ring system
-    const ringGeo = new THREE.RingGeometry(18, 28, 48);
+    const ringGeo = new THREE.RingGeometry(8.3, 11.5, 48);
     ringGeo.rotateX(Math.PI / 2.4);
     const ringMat = new THREE.MeshBasicMaterial({
-      color: 0x38bdf8,
+      color: 0x83bfd2,
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: 0.35
+      opacity: 0.22
     });
     this.themeMaterials.planetB = planetBMat;
     this.themeMaterials.planetBRing = ringMat;
@@ -240,12 +242,11 @@ export class SpaceScene {
     this.scene.add(planetBGroup);
     this.planets.push(planetBGroup);
 
-    // 3. Planet C: Deep dark sphere far in front
     const planetCGroup = new THREE.Group();
-    planetCGroup.position.set(-30, 50, -220);
-    const planetCGeo = new THREE.SphereGeometry(22, 32, 32);
+    planetCGroup.position.set(-28, 34, -244);
+    const planetCGeo = new THREE.SphereGeometry(9, 32, 32);
     const planetCMat = new THREE.MeshStandardMaterial({
-      color: 0x1e1b4b,
+      color: 0x26384b,
       roughness: 0.9,
       metalness: 0.05
     });
@@ -256,24 +257,23 @@ export class SpaceScene {
   }
 
   setupAsteroids() {
-    // 24 low-poly rocky asteroids scattered strictly to the sides of the path (±14 to ±40)
-    // Never placed in the walkable path corridor
+    // Small rocks sit just beyond the path edges and stay out of the walkable corridor.
     const asteroidMat = new THREE.MeshStandardMaterial({
-      color: 0x334155,
+      color: 0x364654,
       roughness: 0.85,
       metalness: 0.2
     });
     this.themeMaterials.asteroid = asteroidMat;
 
-    for (let i = 0; i < 24; i++) {
-      const geo = new THREE.DodecahedronGeometry(0.8 + Math.random() * 1.4, 0);
+    for (let i = 0; i < 12; i++) {
+      const geo = new THREE.DodecahedronGeometry(0.4 + Math.random() * 0.65, 0);
       const mesh = new THREE.Mesh(geo, asteroidMat);
 
       // Side: alternating left and right
       const side = i % 2 === 0 ? -1 : 1;
-      const x = side * (12 + Math.random() * 26);
-      const y = -1 + Math.random() * 8;
-      const z = 10 - i * 8 + (Math.random() - 0.5) * 4;
+      const x = side * (9 + Math.random() * 13);
+      const y = -0.6 + Math.random() * 4;
+      const z = 6 - i * 15 + (Math.random() - 0.5) * 3;
 
       mesh.position.set(x, y, z);
       mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
@@ -293,26 +293,40 @@ export class SpaceScene {
   }
 
   setupNebulae() {
-    // Subtle cosmic dust clouds giving atmospheric depth
-    const nebulaCount = 5;
+    // Soft alpha textures preserve depth without visible rectangular plane edges.
+    const textureCanvas = document.createElement('canvas');
+    textureCanvas.width = 256;
+    textureCanvas.height = 256;
+    const ctx = textureCanvas.getContext('2d');
+    const cloud = ctx.createRadialGradient(128, 128, 6, 128, 128, 126);
+    cloud.addColorStop(0, 'rgba(255,255,255,0.75)');
+    cloud.addColorStop(0.38, 'rgba(255,255,255,0.36)');
+    cloud.addColorStop(0.72, 'rgba(255,255,255,0.1)');
+    cloud.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = cloud;
+    ctx.fillRect(0, 0, 256, 256);
+    const nebulaTexture = new THREE.CanvasTexture(textureCanvas);
+    const nebulaCount = 3;
     for (let i = 0; i < nebulaCount; i++) {
-      const geo = new THREE.PlaneGeometry(60, 40);
+      const geo = new THREE.PlaneGeometry(36, 24);
       const mat = new THREE.MeshBasicMaterial({
-        color: i % 2 === 0 ? 0x312e81 : 0x0c4a6e,
+        map: nebulaTexture,
+        color: i % 2 === 0 ? 0x20445b : 0x2b555a,
         transparent: true,
-        opacity: 0.04,
+        opacity: 0.12,
         blending: THREE.AdditiveBlending,
         side: THREE.DoubleSide,
+        alphaTest: 0.01,
         depthWrite: false
       });
       mat.userData.themeNebulaIndex = i % 2;
       const plane = new THREE.Mesh(geo, mat);
       plane.position.set(
-        (Math.random() - 0.5) * 50,
-        10 + Math.random() * 20,
-        -30 - i * 35
+        (i - 1) * 19 + (Math.random() - 0.5) * 5,
+        8 + Math.random() * 8,
+        -44 - i * 52
       );
-      plane.rotation.set(Math.random() * 0.5, Math.random() * Math.PI, 0);
+      plane.rotation.set((Math.random() - 0.5) * 0.22, (Math.random() - 0.5) * 0.28, 0);
       this.scene.add(plane);
       this.nebulaPlanes.push(plane);
     }

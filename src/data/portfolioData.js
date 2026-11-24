@@ -30,6 +30,15 @@
  * ============================================================================
  */
 
+export const skillOrbitGroups = [
+  { label: 'Programming', names: ['C#', 'C++', 'C', 'Python'] },
+  { label: 'Engines and Frameworks', names: ['Unity', 'Unreal Engine', 'SDL2'] },
+  { label: '3D and Motion Tools', names: ['Blender', 'Adobe After Effects'] },
+  { label: 'Databases', names: ['MySQL'] },
+  { label: 'UI', names: ['PyQt5', 'Unity UI Toolkit', 'Pygame UI'] },
+  { label: 'Other Skills', names: ['Debugging', 'Problem Solving', 'Idea Generation'] }
+];
+
 export const portfolioData = {
   profile: {
     name: "Rafia Gull",

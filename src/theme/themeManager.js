@@ -19,13 +19,13 @@
         '--shadow-glow': '0 0 24px rgba(56,189,248,0.25)'
       },
       three: {
-        background: 0x020510, fog: 0x020510, fogDensity: 0.005,
-        ambientColor: 0x0e1428, ambientIntensity: 1.6,
-        sunColor: 0xdbeafe, sunIntensity: 2.0, rimColor: 0x7c3aed, rimIntensity: 1.2,
-        starColor: 0xffffff, starOpacity: 0.88, pathColor: 0x38bdf8, pathOpacity: 0.85, guideColor: 0x0284c7, guideOpacity: 0.35,
-        platformColor: 0x090e1f, platformRoughness: 0.6, platformMetalness: 0.4,
-        planetA: 0x312e81, planetAHalo: 0xa855f7, planetB: 0x164e63, planetBRing: 0x38bdf8,
-        planetC: 0x1e1b4b, asteroid: 0x334155, nebula: [0x312e81, 0x0c4a6e], nebulaOpacity: 0.045,
+        background: 0x040914, fog: 0x040914, fogDensity: 0.004,
+        ambientColor: 0x0c1723, ambientIntensity: 1.45,
+        sunColor: 0xdce7f0, sunIntensity: 1.7, rimColor: 0x274663, rimIntensity: 0.8,
+        starColor: 0xe5eef5, starOpacity: 0.76, pathColor: 0x9bd4e4, pathOpacity: 0.78, guideColor: 0x47788b, guideOpacity: 0.18,
+        platformColor: 0x0b121b, platformRoughness: 0.72, platformMetalness: 0.2,
+        planetA: 0x18364a, planetAHalo: 0x3e8195, planetB: 0x23434e, planetBRing: 0x83bfd2,
+        planetC: 0x26384b, asteroid: 0x364654, nebula: [0x20445b, 0x2b555a], nebulaOpacity: 0.14,
         labelBackground: 'rgba(6, 11, 26, 0.9)', labelText: '#ffffff', pulseOpacity: 0.38, activePulseOpacity: 0.82
       }
     },
@@ -46,13 +46,13 @@
         '--shadow-glow': '0 0 24px rgba(3,105,161,0.15)'
       },
       three: {
-        background: 0x8da5be, fog: 0x8da5be, fogDensity: 0.0034,
-        ambientColor: 0xc5d9ef, ambientIntensity: 1.85,
-        sunColor: 0xffffff, sunIntensity: 2.25, rimColor: 0x7755bc, rimIntensity: 1.15,
-        starColor: 0x233e56, starOpacity: 0.98, pathColor: 0x063b59, pathOpacity: 0.9, guideColor: 0x063b59, guideOpacity: 0.58,
-        platformColor: 0xcbd8e7, platformRoughness: 0.7, platformMetalness: 0.16,
-        planetA: 0x5b55a5, planetAHalo: 0x9b70d2, planetB: 0x237b91, planetBRing: 0x075985,
-        planetC: 0x58548c, asteroid: 0x71849a, nebula: [0x9d8cc4, 0x76a8c0], nebulaOpacity: 0.1,
+        background: 0x0a1420, fog: 0x0a1420, fogDensity: 0.0032,
+        ambientColor: 0x253b4b, ambientIntensity: 1.45,
+        sunColor: 0xe7f0f5, sunIntensity: 1.8, rimColor: 0x40647b, rimIntensity: 0.75,
+        starColor: 0xe9f1f5, starOpacity: 0.84, pathColor: 0xb0deea, pathOpacity: 0.88, guideColor: 0x527f8c, guideOpacity: 0.2,
+        platformColor: 0x15222c, platformRoughness: 0.72, platformMetalness: 0.18,
+        planetA: 0x254d60, planetAHalo: 0x548da0, planetB: 0x31555d, planetBRing: 0x9acbd4,
+        planetC: 0x354b59, asteroid: 0x50616b, nebula: [0x3a718a, 0x477b7a], nebulaOpacity: 0.17,
         labelBackground: 'rgba(246, 250, 255, 0.94)', labelText: '#172b41', pulseOpacity: 0.48, activePulseOpacity: 0.9
       }
     }
@@ -60,6 +60,7 @@
 
   const root = document.documentElement;
   const listeners = new Set();
+  let transitionSequence = 0;
   let storedTheme = null;
   try { storedTheme = localStorage.getItem(STORAGE_KEY); } catch (_) { /* Storage can be blocked. */ }
   const systemPrefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? true;
@@ -78,17 +79,57 @@
     listeners.forEach((listener) => listener(theme, THEMES[theme]));
   }
 
-  function playInkReveal(previousTheme, origin) {
-    if (!document.body) return;
-    document.querySelectorAll('.theme-ink-reveal').forEach((reveal) => reveal.remove());
-    const reveal = document.createElement('span');
-    reveal.className = 'theme-ink-reveal';
-    reveal.setAttribute('aria-hidden', 'true');
-    reveal.style.left = `${origin?.x ?? window.innerWidth / 2}px`;
-    reveal.style.top = `${origin?.y ?? window.innerHeight / 2}px`;
-    reveal.style.setProperty('--ink-color', THEMES[previousTheme].css['--page-bg']);
-    reveal.addEventListener('animationend', () => reveal.remove(), { once: true });
-    document.body.appendChild(reveal);
+  function pointList(points) {
+    return `polygon(${points.map(([x, y]) => `${x.toFixed(2)}% ${y.toFixed(2)}%`).join(', ')})`;
+  }
+
+  function inkPolygons(origin) {
+    const width = Math.max(1, window.innerWidth);
+    const height = Math.max(1, window.innerHeight);
+    const centerX = Math.max(0, Math.min(width, origin?.x ?? width / 2));
+    const centerY = Math.max(0, Math.min(height, origin?.y ?? height / 2));
+    const count = 48;
+    const start = [];
+    const end = [];
+
+    for (let i = 0; i < count; i += 1) {
+      const angle = (Math.PI * 2 * i) / count;
+      const dx = Math.cos(angle);
+      const dy = Math.sin(angle);
+      const edgeX = dx > 0 ? (width - centerX) / dx : dx < 0 ? -centerX / dx : Infinity;
+      const edgeY = dy > 0 ? (height - centerY) / dy : dy < 0 ? -centerY / dy : Infinity;
+      const edgeDistance = Math.min(edgeX > 0 ? edgeX : Infinity, edgeY > 0 ? edgeY : Infinity);
+      const organicEdge = 1.38 + 0.12 * Math.sin(angle * 3 + 0.7) + 0.07 * Math.sin(angle * 7 - 0.4);
+      start.push([(centerX / width) * 100, (centerY / height) * 100]);
+      end.push([
+        ((centerX + dx * edgeDistance * organicEdge) / width) * 100,
+        ((centerY + dy * edgeDistance * organicEdge) / height) * 100
+      ]);
+    }
+
+    return { start: pointList(start), end: pointList(end) };
+  }
+
+  function crossfadeUpdate(theme, persist, sequence) {
+    if (typeof root.animate !== 'function') {
+      updateTheme(theme, persist);
+      return;
+    }
+
+    const fadeOut = root.animate(
+      [{ opacity: 1 }, { opacity: 0.72 }],
+      { duration: 110, easing: 'ease-out', fill: 'forwards' }
+    );
+    fadeOut.finished.then(() => {
+      if (sequence !== transitionSequence) return;
+      updateTheme(theme, persist);
+      root.animate(
+        [{ opacity: 0.72 }, { opacity: 1 }],
+        { duration: 150, easing: 'ease-in', fill: 'none' }
+      );
+    }).catch(() => {
+      if (sequence === transitionSequence) updateTheme(theme, persist);
+    });
   }
 
   function apply(theme, persist, origin = null) {
@@ -96,8 +137,43 @@
 
     const previousTheme = currentTheme;
     const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    updateTheme(theme, persist);
-    if (previousTheme !== null && !reduceMotion) playInkReveal(previousTheme, origin);
+    const sequence = ++transitionSequence;
+    root.getAnimations?.().forEach((animation) => animation.cancel());
+    root.style.removeProperty('--theme-ink-start');
+    root.style.removeProperty('--theme-ink-end');
+    if (previousTheme === null || reduceMotion) {
+      updateTheme(theme, persist);
+      return;
+    }
+
+    if (typeof document.startViewTransition !== 'function') {
+      crossfadeUpdate(theme, persist, sequence);
+      return;
+    }
+
+    const polygons = inkPolygons(origin);
+    root.style.setProperty('--theme-ink-start', polygons.start);
+    root.style.setProperty('--theme-ink-end', polygons.end);
+
+    try {
+      const transition = document.startViewTransition(() => updateTheme(theme, persist));
+      transition.finished.finally(() => {
+        if (sequence !== transitionSequence) return;
+        root.style.removeProperty('--theme-ink-start');
+        root.style.removeProperty('--theme-ink-end');
+      }).catch(() => {});
+      transition.updateCallbackDone.catch(() => {
+        if (sequence === transitionSequence && currentTheme !== theme) {
+          root.style.removeProperty('--theme-ink-start');
+          root.style.removeProperty('--theme-ink-end');
+          crossfadeUpdate(theme, persist, sequence);
+        }
+      });
+    } catch (_) {
+      root.style.removeProperty('--theme-ink-start');
+      root.style.removeProperty('--theme-ink-end');
+      crossfadeUpdate(theme, persist, sequence);
+    }
   }
 
   function syncControls(announce) {

@@ -14,6 +14,8 @@ const THEME_COLOR_KEYS = new Set([
 
 class PortfolioApp {
   constructor() {
+    const debugScene = new URLSearchParams(window.location.search).get('debug') === '1';
+    document.documentElement.classList.toggle('debug-scene', debugScene);
     this.container = document.getElementById('canvas-wrap') || document.body;
     this.clock = new THREE.Clock();
 
@@ -199,7 +201,7 @@ class PortfolioApp {
 
         if (obj && obj.userData?.landmark) {
           const landmarkData = obj.userData.landmark.data;
-          this.ui.navigateToSection(landmarkData.id);
+          this.ui.navigateToSection(landmarkData.id, obj.userData.skillGroupIndex ?? null);
         }
       }
     });

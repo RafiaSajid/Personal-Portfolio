@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="./styles/style.css" />
 </head>
 
-<body class="page-mode">
+<body class="page-mode about-page">
   <!-- Top Navigation Bar -->
   <header id="top-nav" role="banner">
     <a href="./index.html" class="nav-brand" aria-label="Return to Home 3D Scene">
@@ -64,6 +64,27 @@
         Experience delivering 2D, 3D, and VR projects using Unity and Unreal Engine, with additional projects in Python
         and C++.
       </p>
+    </section>
+
+    <section class="archive-experience" aria-labelledby="archive-title">
+      <div class="archive-heading">
+        <span class="archive-kicker">PERSONAL ARCHIVE</span>
+        <h2 id="archive-title">A path through games, study, and making</h2>
+        <p>Select a record to read more. Each view uses the portfolio's structured content.</p>
+      </div>
+      <div class="archive-layout">
+        <nav class="archive-index" aria-label="About archive records">
+          <button type="button" data-exhibit="study" aria-pressed="true">Academic studies</button>
+          <button type="button" data-exhibit="vr" aria-pressed="false">VR game work</button>
+          <button type="button" data-exhibit="animation" aria-pressed="false">3D and motion tools</button>
+        </nav>
+        <article class="archive-story" id="archive-story" aria-live="polite" aria-atomic="true">
+          <span class="archive-story-label">FIELD NOTE</span>
+          <h3 id="archive-story-title">Academic studies</h3>
+          <p id="archive-story-body"></p>
+          <p class="archive-story-detail" id="archive-story-detail"></p>
+        </article>
+      </div>
     </section>
 
     <!-- Background & Scope -->
@@ -258,7 +279,48 @@
 
   <script type="module">
     import { ContactManager } from './src/contact/contactManager.js';
+    import { portfolioData } from './src/data/portfolioData.js';
     new ContactManager('contact-form', 'contact-feedback');
+
+    const vrProject = portfolioData.projects.find((project) => project.id === 'vr-games-hub');
+    const blenderSkill = portfolioData.skills.flatMap((group) => group.items).find((skill) => skill.name === 'Blender');
+    const exhibits = {
+      study: {
+        title: 'Academic studies',
+        body: `${portfolioData.education.degree} at ${portfolioData.education.institution}, specializing in ${portfolioData.education.specialization}.`,
+        detail: `${portfolioData.education.location}. ${portfolioData.education.status}. ${portfolioData.education.summary}`
+      },
+      vr: {
+        title: vrProject?.title || 'VR game work',
+        body: vrProject?.details || '',
+        detail: vrProject?.contribution || ''
+      },
+      animation: {
+        title: '3D and motion tools',
+        body: blenderSkill?.desc || '',
+        detail: portfolioData.skills.find((group) => group.category === 'Tools & Software')?.items
+          .filter((skill) => skill.name !== 'Blender')
+          .map((skill) => `${skill.name}: ${skill.desc}`)
+          .join(' ') || ''
+      }
+    };
+    const exhibitTitle = document.getElementById('archive-story-title');
+    const exhibitBody = document.getElementById('archive-story-body');
+    const exhibitDetail = document.getElementById('archive-story-detail');
+    document.querySelectorAll('[data-exhibit]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const exhibit = exhibits[button.dataset.exhibit];
+        if (!exhibit) return;
+        document.querySelectorAll('[data-exhibit]').forEach((item) => {
+          item.setAttribute('aria-pressed', String(item === button));
+        });
+        exhibitTitle.textContent = exhibit.title;
+        exhibitBody.textContent = exhibit.body;
+        exhibitDetail.textContent = exhibit.detail;
+      });
+    });
+    exhibitBody.textContent = exhibits.study.body;
+    exhibitDetail.textContent = exhibits.study.detail;
 
     const navToggle = document.getElementById('nav-toggle');
     const navMobile = document.getElementById('nav-mobile');

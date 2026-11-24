@@ -28,6 +28,7 @@ export class AvatarController {
     this.cameraOffset = new THREE.Vector3(0, 3.2, 6.2);
     this.cameraCurrentPos = new THREE.Vector3().copy(this.position).add(this.cameraOffset);
     this.cameraLookTarget = new THREE.Vector3();
+    this.cameraFocusTarget = null;
     this.orbitAngles = { yaw: 0, pitch: 0.18 };
     this.zoomDistance = 6.2;
     this.minZoom = 3.2;
@@ -224,6 +225,30 @@ export class AvatarController {
     shadow.position.y = 0.02;
     group.add(shadow);
 
+    // Clearly mark this fallback so it cannot be mistaken for the supplied avatar.
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = 320;
+    tempCanvas.height = 72;
+    const context = tempCanvas.getContext('2d');
+    context.fillStyle = 'rgba(7, 15, 24, 0.84)';
+    context.fillRect(2, 6, 316, 60);
+    context.strokeStyle = '#d7ad66';
+    context.lineWidth = 2;
+    context.strokeRect(2, 6, 316, 60);
+    context.fillStyle = '#f0d9ad';
+    context.font = '600 26px Segoe UI, sans-serif';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText('TEMPORARY AVATAR', 160, 36);
+    const tempLabel = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: new THREE.CanvasTexture(tempCanvas),
+      transparent: true,
+      depthWrite: false
+    }));
+    tempLabel.position.set(0, 2.85, 0);
+    tempLabel.scale.set(1.7, 0.38, 1);
+    group.add(tempLabel);
+
     this.root.add(group);
 
     this.proceduralParts = {
@@ -378,12 +403,24 @@ export class AvatarController {
     this.cameraCurrentPos.lerp(targetPos, factor);
     this.camera.position.copy(this.cameraCurrentPos);
 
-    this.cameraLookTarget.set(
-      this.root.position.x,
-      this.root.position.y + 1.4,
-      this.root.position.z - 2.0 // Look slightly ahead down the path
-    );
+    if (this.cameraFocusTarget) {
+      this.cameraLookTarget.lerp(this.cameraFocusTarget, factor);
+    } else {
+      this.cameraLookTarget.set(
+        this.root.position.x,
+        this.root.position.y + 1.4,
+        this.root.position.z - 2.0 // Look slightly ahead down the path
+      );
+    }
     this.camera.lookAt(this.cameraLookTarget);
+  }
+
+  focusCameraOn(x, y, z) {
+    this.cameraFocusTarget = new THREE.Vector3(x, y, z);
+  }
+
+  clearCameraFocus() {
+    this.cameraFocusTarget = null;
   }
 
   rotateCamera(deltaYaw, deltaPitch) {
