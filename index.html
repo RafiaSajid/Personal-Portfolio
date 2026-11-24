@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <meta name="description" content="Rafia Gull - Aspiring Game Developer & Computer Science Student in Gaming & Animation at NED University. 3D Space Journey Portfolio." />
-  <title>Rafia Gull | 3D Space Journey Portfolio</title>
+  <meta name="description" content="Rafia Gull - Aspiring Game Developer & Computer Science Student in Gaming & Animation at NED University. Interactive 3D Space Portfolio." />
+  <title>Rafia Gull | Interactive 3D Space Portfolio</title>
 
   <script src="./src/theme/themeManager.js"></script>
   <!-- Main Stylesheet -->
@@ -25,7 +25,7 @@
   <!-- Loading Screen -->
   <div id="loading-screen" role="status" aria-live="polite">
     <div class="loading-ring" aria-hidden="true"></div>
-    <div id="loading-message">Initializing 3D Star Path...</div>
+    <div id="loading-message">Initializing 3D Space...</div>
   </div>
 
   <!-- WebGL Fallback (Displayed if WebGL fails to load) -->
@@ -37,11 +37,12 @@
     <div style="display:flex; gap:0.75rem; flex-wrap:wrap; justify-content:center; margin-top:1rem;">
       <a href="./about.html" class="card-btn card-btn-primary" style="padding:0.6rem 1.2rem;">About Me</a>
       <a href="./projects.html" class="card-btn card-btn-primary" style="padding:0.6rem 1.2rem;">Projects Catalog</a>
+      <a href="./about.html#skills-section" class="card-btn card-btn-primary" style="padding:0.6rem 1.2rem;">Skills</a>
     </div>
   </div>
 
   <!-- WebGL Canvas Wrap -->
-  <main id="canvas-wrap" aria-label="3D Star Path Scene">
+  <main id="canvas-wrap" aria-label="Interactive 3D Portfolio World">
     <!-- Three.js Canvas injected here -->
   </main>
 
@@ -59,7 +60,7 @@
       <ul class="nav-links">
         <li><a href="#" data-nav="home" aria-current="page">Home</a></li>
         <li><a href="./about.html" data-nav="about">About Me</a></li>
-        <li><a href="./projects.html" data-nav="projects">Projects</a></li>
+        <li><a href="#projects" data-nav="projects">Projects</a></li>
         <li><a href="#education" data-nav="education">Education</a></li>
         <li><a href="#skills" data-nav="skills">Skills</a></li>
         <li><a href="./about.html#contact-section">Contact</a></li>
@@ -77,11 +78,11 @@
 
   <!-- Mobile Dropdown Navigation Menu -->
   <div id="nav-mobile" role="navigation" aria-label="Mobile Navigation">
-    <a href="#" data-nav="home">Home (Reset View)</a>
+    <a href="#" data-nav="home">Home / Return</a>
     <a href="./about.html" data-nav="about">About Me</a>
-    <a href="./projects.html" data-nav="projects">Projects</a>
+    <a href="#projects" data-nav="projects">Projects Portal</a>
     <a href="#education" data-nav="education">Education Panel</a>
-    <a href="#skills" data-nav="skills">Skills Matrix</a>
+    <a href="#skills" data-nav="skills">Skills Portal</a>
     <a href="#chat" data-nav="chat">AI Assistant (ASTRA)</a>
     <a href="./about.html#contact-section">Contact</a>
   </div>
@@ -96,7 +97,7 @@
     </p>
     <div>
       <button id="explore-btn" class="explore-btn">
-        <span>EXPLORE 3D STAR PATH</span> &darr;
+        <span>EXPLORE 3D SPACE</span> &darr;
       </button>
     </div>
   </section>
@@ -112,7 +113,7 @@
       <span class="key">A</span>
       <span class="key">S</span>
       <span class="key">D</span>
-      <span>Walk Star Path</span>
+      <span>Move Freely</span>
       <span style="margin: 0 4px; opacity:0.4;">|</span>
       <span>Drag Canvas to Look</span>
     </div>
@@ -155,6 +156,7 @@
 
   <!-- Content Panel Overlay (for Education and Skills) -->
   <div id="panel-backdrop" tabindex="-1"></div>
+  <div id="journey-transition" aria-hidden="true"></div>
   <aside id="content-panel" role="dialog" aria-modal="true" aria-labelledby="panel-title">
     <div class="panel-header">
       <h2 id="panel-title">STATION DATA</h2>
@@ -200,5 +202,21 @@
 
   <!-- Main Application Script -->
   <script type="module" src="./portfolio.js"></script>
+
+  <!-- Legal Modal Dialog -->
+  <div id="legal-modal" class="legal-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="legal-modal-title" aria-hidden="true">
+    <div class="legal-modal-box">
+      <div class="legal-modal-header">
+        <h3 id="legal-modal-title">LEGAL NOTICE</h3>
+        <button id="legal-modal-close" class="legal-modal-close" aria-label="Close dialog">&times;</button>
+      </div>
+      <div id="legal-modal-body" class="legal-modal-body"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { FooterManager } from './src/ui/footerManager.js';
+    new FooterManager();
+  </script>
 </body>
 </html>

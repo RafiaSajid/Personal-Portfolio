@@ -44,10 +44,10 @@ export const portfolioData = {
     name: "Rafia Gull",
     role: "Aspiring Game Developer",
     university: "NED University",
-    location: "Karachi, Sindh, Pakistan",
+    location: "Karachi, Pakistan",
     summary: "Computer Science student at NED University specializing in Gaming and Animation. Experience delivering 2D, 3D, and VR projects using Unity and Unreal Engine, with additional projects in Python and C++.",
     bio: [
-      "I am a Computer Science student at NED University in Karachi, Sindh, Pakistan, specializing in Gaming and Animation.",
+      "I am a Computer Science student at NED University in Karachi, Pakistan, specializing in Gaming and Animation.",
       "My hands-on experience spans delivering 2D, 3D, and immersive VR projects using Unity and Unreal Engine, along with foundational software and games engineered in Python and C++.",
       "I focus on core gameplay mechanics, character animation, physics systems, and interactive problem solving."
     ],
@@ -57,17 +57,17 @@ export const portfolioData = {
     contact: {
       email: "abc@gmail.com",
       isEmailPlaceholder: true,
-      githubUrl: null,    // Set to valid URL when ready (e.g. "https://github.com/username")
-      linkedinUrl: null,  // Set to valid URL when ready (e.g. "https://linkedin.com/in/username")
+      githubUrl: "https://github.com/RafiaSajid",    // Set to valid URL when ready (e.g. "https://github.com/username")
+      linkedinUrl: "https://www.linkedin.com/in/rafia-gull-495bb82ba/",  // Set to valid URL when ready (e.g. "https://linkedin.com/in/username")
       itchUrl: null,      // Optional itch.io profile
-      location: "Karachi, Sindh, Pakistan"
+      location: "Karachi, Pakistan"
     }
   },
 
   // Academic Education
   education: {
     institution: "NED University",
-    location: "Karachi, Sindh, Pakistan",
+    location: "Karachi, Pakistan",
     degree: "Bachelor of Science in Computer Science",
     specialization: "Specialization in Gaming and Animation",
     status: "Currently studying",
@@ -141,7 +141,7 @@ export const portfolioData = {
     }
   ],
 
-  // 3D Scene Landmarks along the star path
+  // Scattered home-space landmarks. Portals lead to the Projects and Skills regions.
   landmarks: [
     {
       id: "about",
@@ -149,13 +149,13 @@ export const portfolioData = {
       label: "ABOUT ME",
       code: "LM-01",
       subtitle: "NED University • Gaming & Animation",
-      position: { x: -6, y: 1.5, z: -35 },
-      targetZ: -30,
+      position: { x: -22, y: 1.5, z: -17 },
+      targetZ: -12,
       color: 0x8b5cf6,
       glowColor: "#a855f7",
       type: "about",
-      actionText: "Visit About Me",
-      description: "Learn about Rafia's Computer Science background at NED University, game development focus, and CEGA certifications."
+      actionText: "Enter About Station Portal",
+      // description: "Explore the walkable orbital research station and archive covering studies at NED University, VR development, and 3D character animation."
     },
     {
       id: "projects",
@@ -163,13 +163,13 @@ export const portfolioData = {
       label: "PROJECTS",
       code: "LM-02",
       subtitle: "2D, 3D, VR, Python & C++",
-      position: { x: 7, y: 1.8, z: -75 },
-      targetZ: -70,
+      position: { x: 26, y: 1.8, z: -11 },
+      targetZ: -6,
       color: 0x0ea5e9,
       glowColor: "#38bdf8",
       type: "projects",
-      actionText: "Explore Projects Catalog",
-      description: "Explore 7 projects spanning Unity VR, Unreal Engine 3D, Unity 2D, Python apps, and C++ games."
+      actionText: "Enter Projects Portal",
+      // description: "Explore 7 projects spanning Unity VR, Unreal Engine 3D, Unity 2D, Python apps, and C++ games."
     },
     {
       id: "education",
@@ -177,13 +177,13 @@ export const portfolioData = {
       label: "EDUCATION",
       code: "LM-03",
       subtitle: "NED University & CEGA Certifications",
-      position: { x: -7, y: 1.5, z: -115 },
-      targetZ: -110,
+      position: { x: 12, y: 1.5, z: 34 },
+      targetZ: 39,
       color: 0x10b981,
       glowColor: "#34d399",
       type: "education",
       actionText: "View Education & Certifications",
-      description: "Academic studies at NED University and practical certifications by CEGA."
+      // description: "Academic studies at NED University and practical certifications by CEGA."
     },
     {
       id: "skills",
@@ -191,13 +191,13 @@ export const portfolioData = {
       label: "SKILLS",
       code: "LM-04",
       subtitle: "Languages, Engines, Tools & DB",
-      position: { x: 6, y: 1.6, z: -155 },
-      targetZ: -150,
+      position: { x: -32, y: 1.6, z: 23 },
+      targetZ: 28,
       color: 0xf59e0b,
       glowColor: "#fbbf24",
       type: "skills",
-      actionText: "Open Skills Matrix",
-      description: "Skill breakdown across C#, C, C++, Python, Unity, Unreal Engine, Blender, and MySQL."
+      actionText: "Enter Skills Portal",
+      // description: "Skill breakdown across C#, C, C++, Python, Unity, Unreal Engine, Blender, and MySQL."
     }
   ],
 
@@ -249,6 +249,21 @@ export const portfolioData = {
       order: 3
     },
     {
+      id: "parallax-the-spae-of-space",
+      title: "Parallax: The Space of Space",
+      category: "3D Web Games",
+      technologies: ["Three.js", "HTML", "CSS"],
+      summary: "A level-based 3D puzzle about eating the right food at the right time, with a relaxing environment and health system.",
+      details: "A level-based 3D puzzle built in Three.js about eating the right food at the right time, featuring a relaxing environment and an interactive health system dynamically affected by dietary choices.",
+      contribution: "Created an animated character in Blender, implemented core game logic, and helped debug the project.",
+      githubUrl: null,
+      linkedinUrl: null,
+      videoUrl: null,
+      thumbnail: null,
+      featured: true,
+      order: 2
+    },
+    {
       id: "study-buddy",
       title: "Study Buddy",
       category: "Python Apps",
@@ -261,7 +276,7 @@ export const portfolioData = {
       videoUrl: null,
       thumbnail: null,
       featured: false,
-      order: 4
+      order: 7
     },
     {
       id: "study-planner-tracker",
@@ -276,7 +291,7 @@ export const portfolioData = {
       videoUrl: null,
       thumbnail: null,
       featured: false,
-      order: 5
+      order: 8
     },
     {
       id: "cherrysweeper",
@@ -291,7 +306,7 @@ export const portfolioData = {
       videoUrl: null,
       thumbnail: null,
       featured: false,
-      order: 6
+      order: 9
     },
     {
       id: "tic-tac-toe",
@@ -306,7 +321,7 @@ export const portfolioData = {
       videoUrl: null,
       thumbnail: null,
       featured: false,
-      order: 7
+      order: 10
     }
   ]
 };

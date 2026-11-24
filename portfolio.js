@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 import { SpaceScene } from './src/scene/spaceScene.js';
 import { LandmarkManager } from './src/scene/landmarks.js';
+import { WorldJourneyManager } from './src/scene/worldJourneyManager.js';
 import { AvatarController } from './src/character/avatarController.js';
+import { CustomNPCManager } from './src/character/npcManager.js';
 import { InputManager } from './src/controls/inputManager.js';
 import { AudioManager } from './src/audio/audioManager.js';
 import { GroundedChat } from './src/chat/groundedChat.js';
@@ -107,8 +109,14 @@ class PortfolioApp {
     // 6. Interactive 3D Star Landmarks
     this.landmarks = new LandmarkManager(this.scene);
 
-    // 7. HUD & Navigation UI Manager
-    this.ui = new UIManager(this.avatar, this.audio, this.chat);
+    // 7. Optional Custom Characters / NPCs
+    this.npcManager = new CustomNPCManager(this.scene);
+
+    // 8. In-world Projects, Skills, and About Me environments, using the same scene/renderer.
+    this.worldJourneys = new WorldJourneyManager(this.scene, this.avatar, this.landmarks);
+
+    // 9. HUD & Navigation UI Manager
+    this.ui = new UIManager(this.avatar, this.audio, this.chat, this.worldJourneys);
   }
 
   connectTheme() {
@@ -189,19 +197,36 @@ class PortfolioApp {
       this.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
       this.raycaster.setFromCamera(this.mouse, this.camera);
-      const targets = this.landmarks.getRaycastTargets();
+      const targets = this.worldJourneys.getRaycastTargets();
       const intersects = this.raycaster.intersectObjects(targets, true);
 
       if (intersects.length > 0) {
+        const selected = intersects[0].object;
+        if (selected.userData?.returnHomePortal) {
+          this.worldJourneys.returnHome();
+          return;
+        }
+        if (selected.userData?.projectId) {
+          this.ui.openProjectDetails(selected.userData.projectId);
+          return;
+        }
+        if (selected.userData?.destinationId) {
+          this.worldJourneys.enter(selected.userData.destinationId);
+          return;
+        }
         // Find ancestor with landmark data
-        let obj = intersects[0].object;
+        let obj = selected;
         while (obj && !obj.userData?.landmark) {
           obj = obj.parent;
         }
 
         if (obj && obj.userData?.landmark) {
           const landmarkData = obj.userData.landmark.data;
-          this.ui.navigateToSection(landmarkData.id, obj.userData.skillGroupIndex ?? null);
+          if (Number.isInteger(obj.userData.skillGroupIndex) && this.worldJourneys.destination === 'skills') {
+            window.dispatchEvent(new CustomEvent('portfolio:skill-select', { detail: { index: obj.userData.skillGroupIndex } }));
+          } else {
+            this.ui.navigateToSection(landmarkData.id, obj.userData.skillGroupIndex ?? null);
+          }
         }
       }
     });
@@ -234,6 +259,8 @@ class PortfolioApp {
     this.landmarks.update(delta, this.avatar.position, (nearby) => {
       this.ui.onProximityChanged(nearby);
     });
+    this.worldJourneys.update();
+    this.npcManager?.update(delta, this.avatar.position);
 
     // 4. Update HUD coordinates
     this.ui.updateHUD(this.avatar.position, this.avatar.orbitAngles.yaw);

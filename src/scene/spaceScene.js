@@ -96,8 +96,7 @@ export class SpaceScene {
   }
 
   setupStarPath() {
-    // A navigable forward path made of visible glowing star clusters
-    // Extends from z = 12 down to z = -180 along the primary trajectory
+    // Scattered star clusters make a discoverable field without prescribing a route.
     const pathGroup = new THREE.Group();
     this.pathGroup = pathGroup;
 
@@ -115,20 +114,20 @@ export class SpaceScene {
       alphaTest: 0.08
     });
 
-    // Small, close-spaced star clusters form one continuous walkable route.
-    for (let z = 12; z >= -180; z -= 3.0) {
-      const count = 7;
+    for (let clusterIndex = 0; clusterIndex < 116; clusterIndex += 1) {
+      const count = 5 + Math.floor(Math.random() * 6);
       const positions = new Float32Array(count * 3);
+      const centerX = (Math.random() - 0.5) * 340;
+      const centerZ = (Math.random() - 0.5) * 340;
 
       for (let i = 0; i < count; i++) {
-        const centerline = Math.sin(z * 0.035) * 0.52;
-        const x = centerline + (Math.random() - 0.5) * 3.1;
-        const y = 0.015 + Math.random() * 0.08;
-        const zOffset = (Math.random() - 0.5) * 1.2;
+        const x = centerX + (Math.random() - 0.5) * 3.6;
+        const y = 0.025 + Math.random() * 0.24;
+        const z = centerZ + (Math.random() - 0.5) * 3.6;
 
         positions[i * 3] = x;
         positions[i * 3 + 1] = y;
-        positions[i * 3 + 2] = z + zOffset;
+        positions[i * 3 + 2] = z;
       }
 
       const geo = new THREE.BufferGeometry();
@@ -141,33 +140,11 @@ export class SpaceScene {
       pathGroup.add(points);
       this.pathClusters.push({
         points,
-        baseZ: z,
+        centerX,
+        centerZ,
         phase: Math.random() * Math.PI * 2
       });
     }
-
-    // Glowing edge guide lines (subtle luminous path boundaries)
-    const lineGeo = new THREE.BufferGeometry();
-    const linePointsLeft = [];
-    const linePointsRight = [];
-    for (let z = 12; z >= -180; z -= 2) {
-      linePointsLeft.push(new THREE.Vector3(-2.8, -0.02, z));
-      linePointsRight.push(new THREE.Vector3(2.8, -0.02, z));
-    }
-    const leftLineGeo = new THREE.BufferGeometry().setFromPoints(linePointsLeft);
-    const rightLineGeo = new THREE.BufferGeometry().setFromPoints(linePointsRight);
-
-    const guideLineMat = new THREE.LineBasicMaterial({
-      color: 0x39758f,
-      transparent: true,
-      opacity: 0.13
-    });
-
-    const leftLine = new THREE.Line(leftLineGeo, guideLineMat);
-    const rightLine = new THREE.Line(rightLineGeo, guideLineMat);
-    this.pathGuideMaterials.push(guideLineMat);
-    pathGroup.add(leftLine);
-    pathGroup.add(rightLine);
 
     this.scene.add(pathGroup);
   }
@@ -194,7 +171,7 @@ export class SpaceScene {
   setupPlanets() {
     // Three distant bodies provide scale without filling the camera view.
     const planetAGroup = new THREE.Group();
-    planetAGroup.position.set(-58, 24, -96);
+    planetAGroup.position.set(-72, 24, -35);
     const planetAGeo = new THREE.SphereGeometry(8, 32, 32);
     const planetAMat = new THREE.MeshStandardMaterial({
       color: 0x18364a,
@@ -217,7 +194,7 @@ export class SpaceScene {
     this.planets.push(planetAGroup);
 
     const planetBGroup = new THREE.Group();
-    planetBGroup.position.set(58, 17, -154);
+    planetBGroup.position.set(76, 17, 52);
     const planetBGeo = new THREE.SphereGeometry(6, 32, 32);
     const planetBMat = new THREE.MeshStandardMaterial({
       color: 0x23434e,
@@ -243,7 +220,7 @@ export class SpaceScene {
     this.planets.push(planetBGroup);
 
     const planetCGroup = new THREE.Group();
-    planetCGroup.position.set(-28, 34, -244);
+    planetCGroup.position.set(-62, 34, 78);
     const planetCGeo = new THREE.SphereGeometry(9, 32, 32);
     const planetCMat = new THREE.MeshStandardMaterial({
       color: 0x26384b,
@@ -257,7 +234,7 @@ export class SpaceScene {
   }
 
   setupAsteroids() {
-    // Small rocks sit just beyond the path edges and stay out of the walkable corridor.
+    // A few small rocks are scattered well outside the landmark clusters.
     const asteroidMat = new THREE.MeshStandardMaterial({
       color: 0x364654,
       roughness: 0.85,
@@ -269,11 +246,11 @@ export class SpaceScene {
       const geo = new THREE.DodecahedronGeometry(0.4 + Math.random() * 0.65, 0);
       const mesh = new THREE.Mesh(geo, asteroidMat);
 
-      // Side: alternating left and right
-      const side = i % 2 === 0 ? -1 : 1;
-      const x = side * (9 + Math.random() * 13);
-      const y = -0.6 + Math.random() * 4;
-      const z = 6 - i * 15 + (Math.random() - 0.5) * 3;
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 34 + Math.random() * 58;
+      const x = Math.cos(angle) * radius;
+      const y = 2 + Math.random() * 9;
+      const z = Math.sin(angle) * radius;
 
       mesh.position.set(x, y, z);
       mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
@@ -354,16 +331,13 @@ export class SpaceScene {
       this.stars.geometry.attributes.color.needsUpdate = true;
     }
 
-    // 3. Star path pulsation and forward reveal ahead of player
-    const playerZ = playerPos ? playerPos.z : 0;
+    // 3. Nearby constellations brighten gently around the roaming avatar.
     this.pathClusters.forEach((cluster) => {
-      // Distance from player along Z
-      const distFromPlayer = cluster.baseZ - playerZ;
-      // Clusters within visible range ahead of player glow brighter
+      const distance = playerPos
+        ? Math.hypot(cluster.centerX - playerPos.x, cluster.centerZ - playerPos.z)
+        : Infinity;
       let proximityFactor = 1.0;
-      if (distFromPlayer < 5 && distFromPlayer > -35) {
-        proximityFactor = 1.35;
-      }
+      if (distance < 26) proximityFactor = 1.12;
 
       const pulse = Math.sin(this.time * 3 + cluster.phase) * 0.2 + 0.8;
       cluster.points.material.opacity = Math.min(1.0, this.themePathOpacity * pulse * proximityFactor);

@@ -31,13 +31,13 @@ export const avatarConfig = {
   positionOffset: [0, 0, 2],
   rotationOffset: [0, Math.PI, 0], // Rotated to face forward along negative Z
 
-  // Walkable Route Boundary Constraints:
-  // Keeps the avatar strictly within the star path corridor so it cannot wander into space or asteroids
+  // Broad bounds keep the avatar in the explorable portfolio world without
+  // forcing it onto the star clusters or a narrow route.
   bounds: {
-    minX: -4.5,   // Left path boundary
-    maxX: 4.5,    // Right path boundary
-    minZ: -175.0, // Forward-most limit (beyond Skills landmark)
-    maxZ: 8.0     // Backward-most starting dock limit
+    minX: -190,
+    maxX: 190,
+    minZ: -190,
+    maxZ: 190
   },
 
   // Locomotion tuning

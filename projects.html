@@ -334,5 +334,65 @@
       });
     }
   </script>
+  <!-- Space-Themed Animated Footer -->
+  <footer id="site-footer" role="contentinfo">
+    <div class="footer-space-track" aria-hidden="true">
+      <div class="footer-orbit-particle"></div>
+    </div>
+    <div class="footer-container">
+      <div class="footer-main">
+        <div class="footer-brand">
+          <div class="footer-title">RAFIA GULL</div>
+          <div class="footer-subtitle">Aspiring Game Developer • Gaming & Animation</div>
+          <p class="footer-summary">Computer Science student at NED University specializing in Gaming and Animation. Building 2D, 3D, and VR projects in Unity and Unreal Engine.</p>
+        </div>
+        <div class="footer-nav-groups">
+          <div class="footer-nav-col">
+            <div class="footer-col-heading">Navigation</div>
+            <a href="./index.html">Home (3D Scene)</a>
+            <a href="./about.html">About Me</a>
+            <a href="./projects.html" aria-current="page">Projects Catalog</a>
+            <a href="./index.html#education">Education</a>
+            <a href="./index.html#skills">Skills</a>
+          </div>
+          <div class="footer-nav-col">
+            <div class="footer-col-heading">Station & Inquiries</div>
+            <a href="./about.html#contact-section">Direct Contact</a>
+            <a href="./index.html#chat">ASTRA AI Companion</a>
+            <a href="./index.html#about">Orbital Station Archive</a>
+          </div>
+          <div class="footer-nav-col">
+            <div class="footer-col-heading">Legal & Policies</div>
+            <button type="button" class="footer-legal-btn" data-legal-trigger="privacy">Privacy Policy</button>
+            <button type="button" class="footer-legal-btn" data-legal-trigger="terms">Terms of Use</button>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>&copy; 2026 Rafia Gull. All rights reserved.</div>
+        <div class="footer-coords-status">
+          <span class="footer-status-dot" aria-hidden="true"></span>
+          <span>PROJECT CATALOGUE // ONLINE</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Legal Modal Dialog -->
+  <div id="legal-modal" class="legal-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="legal-modal-title" aria-hidden="true">
+    <div class="legal-modal-box">
+      <div class="legal-modal-header">
+        <h3 id="legal-modal-title">LEGAL NOTICE</h3>
+        <button id="legal-modal-close" class="legal-modal-close" aria-label="Close dialog">&times;</button>
+      </div>
+      <div id="legal-modal-body" class="legal-modal-body"></div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/ui/footerManager.js"></script>
+  <script type="module">
+    import { FooterManager } from './src/ui/footerManager.js';
+    new FooterManager();
+  </script>
 </body>
 </html>

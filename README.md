@@ -20,6 +20,14 @@ On Windows PowerShell, copy the example with `Copy-Item .env.example .env`. Edit
 
 No third-party package installation is needed by the app itself. `npm install` is harmless when there are no dependencies and creates the usual local npm metadata.
 
+## Explore the 3D world
+
+The home scene is a free-roam space field. Use **WASD** or the arrow keys to move, hold **Shift** to move faster, and drag the canvas (or swipe on touch screens) to look around. On mobile, use the on-screen directional pad. The About and Education landmarks are scattered through the home field.
+
+Enter the visible **Projects** or **Skills** portal by walking through it, clicking its opening, or choosing Projects Portal / Skills Portal in the navigation. Each journey uses the existing Three.js renderer and keeps the avatar in the shared world. In the Projects gallery, approach a display and press **E**, click its model, or choose a title from the accessible project list to read the real structured details and open any supplied media or links. In the Skills orbit, move around the controller and select or approach one of the labeled planets; the parallel category list exposes all current skill names. Use Home / Return or walk through the Home portal to leave a destination.
+
+If WebGL is unavailable, use the Projects catalog and the Skills section on the About page; both remain ordinary page content.
+
 ## Build and deploy on Vercel
 
 The Vercel project uses the repository root. The build command is `npm run build`, which rebuilds `api/data/knowledgeBase.json` from the structured portfolio data. Vercel serves the root HTML files as static pages, recognizes `api/chat.js` and `api/contact.js` as serverless functions, and `cleanUrls` allows both extensionless and `.html` page URLs. No custom API rewrite is needed.

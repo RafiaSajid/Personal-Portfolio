@@ -10,7 +10,7 @@ export class AvatarController {
 
     // Avatar Root Container
     this.root = new THREE.Group();
-    this.root.position.set(0, 0, 4); // Start on star path
+    this.root.position.set(0, 0, 4); // Begin in the home exploration field
     this.scene.add(this.root);
 
     // Locomotion state
@@ -31,7 +31,8 @@ export class AvatarController {
     this.cameraFocusTarget = null;
     this.orbitAngles = { yaw: 0, pitch: 0.18 };
     this.zoomDistance = 6.2;
-    this.minZoom = 3.2;
+    // Guard against camera clipping inside avatar mesh (minimum safe distance is 4.0)
+    this.minZoom = 4.0;
     this.maxZoom = 12.0;
 
     // Reduced motion flag
@@ -317,8 +318,7 @@ export class AvatarController {
     this.root.position.x += this.velocity.x * delta;
     this.root.position.z += this.velocity.z * delta;
 
-    // Strict Walkable Route Boundary Constraints:
-    // Keeps player on the path; prevents wandering into space or through asteroids
+    // Broad bounds keep the avatar in the shared portfolio world while allowing free roaming.
     const bounds = avatarConfig.bounds;
     this.root.position.x = Math.max(bounds.minX, Math.min(bounds.maxX, this.root.position.x));
     this.root.position.z = Math.max(bounds.minZ, Math.min(bounds.maxZ, this.root.position.z));
@@ -385,18 +385,29 @@ export class AvatarController {
     const pitch = Math.max(-0.2, Math.min(0.8, this.orbitAngles.pitch));
     const yaw = this.orbitAngles.yaw;
 
-    const hDist = this.zoomDistance * Math.cos(pitch);
-    const vDist = this.zoomDistance * Math.sin(pitch);
+    // Enforce minZoom clamp strictly
+    const currentZoom = Math.max(this.minZoom, this.zoomDistance);
+    const hDist = currentZoom * Math.cos(pitch);
+    const vDist = currentZoom * Math.sin(pitch);
 
     const offsetX = Math.sin(yaw) * hDist;
     const offsetZ = Math.cos(yaw) * hDist;
-    const offsetY = Math.max(1.2, vDist);
+    const offsetY = Math.max(1.5, vDist);
 
     const targetPos = new THREE.Vector3(
       this.root.position.x + offsetX,
       this.root.position.y + offsetY + 1.2,
       this.root.position.z + offsetZ
     );
+
+    // Collision & clipping safety guard: ensure camera position never comes closer
+    // than 3.5 units to avatar center (prevents camera clipping inside head/torso)
+    const avatarCenter = new THREE.Vector3(this.root.position.x, this.root.position.y + 1.3, this.root.position.z);
+    const camDir = new THREE.Vector3().subVectors(targetPos, avatarCenter);
+    if (camDir.length() < 3.8) {
+      camDir.normalize().multiplyScalar(3.8);
+      targetPos.copy(avatarCenter).add(camDir);
+    }
 
     // Lerp factor (higher factor if reduced motion preferred)
     const factor = this.reducedMotion ? 1.0 : Math.min(1.0, delta * 7.0);
