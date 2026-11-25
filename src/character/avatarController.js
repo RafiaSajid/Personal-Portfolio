@@ -49,6 +49,15 @@ export class AvatarController {
   }
 
   init() {
+    // Dedicated local key/fill light attached to the avatar so it never fades in dark space
+    const playerKeyLight = new THREE.PointLight(0xe0f2fe, 2.2, 14, 1.4);
+    playerKeyLight.position.set(0, 3.2, 2.5);
+    this.root.add(playerKeyLight);
+
+    const playerRimLight = new THREE.PointLight(0x93c5fd, 1.1, 10, 1.5);
+    playerRimLight.position.set(0, 2.4, -2.5);
+    this.root.add(playerRimLight);
+
     if (avatarConfig.modelPath) {
       this.loadCustomModel(avatarConfig.modelPath);
     } else {
