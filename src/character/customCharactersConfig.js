@@ -11,11 +11,11 @@
 
 export const customCharactersConfig = [
   {
-    id: 'vr-hub-sentinel',
-    label: 'VR Hub Guide',
+    id: '3D Cat',
+    label: '3D Cat',
     // Configurable GLB model path (e.g. './assets/characters/vr-guide.glb')
     // Defaults to null so scene runs cleanly without requiring models
-    modelPath: null,
+    modelPath: './assets/characters/cat.glb',
     // Destination or world position
     destination: 'projects',
     position: { x: 104, y: 0, z: -88 },
@@ -28,7 +28,7 @@ export const customCharactersConfig = [
     // Clip names inside the custom GLB
     clips: {
       idle: 'idle',
-      wave: 'wave'
+      wave: 'idle2'
     }
   },
   {

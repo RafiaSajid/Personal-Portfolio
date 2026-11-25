@@ -2,20 +2,23 @@ import * as THREE from "three";
 
 /* ────────────────────────────────────────────────────────────
    EDIT ME: all content lives here
-   Videos: /assets/videos/   Music: /assets/audio/bg-music.mp3
+   Videos: /assets/videos/   Music: /assets/audio/bd-music.mp3
    ──────────────────────────────────────────────────────────── */
 const video = (file) => `/assets/videos/${encodeURIComponent(file)}`;
 
 const PROJECTS = [
   { title: "EAT RIGHT RUN", badge: "Group Project", src: video("eat-right-run.mp4") },
   { title: "Parallax Effect", badge: "Solo Project", src: video("parallax.mp4") },
-  { title: "3D Character", badge: "Solo Project", src: video("charmy1.mp4") },
-  { title: "Minecraft Environment", badge: "Solo Project", src: video("minecraft(1).mp4") },
+  { title: "3D Character for Portfolio", badge: "Solo Project", src: video("charmy1.mp4") },
+  { title: "Minecraft Environment", badge: "Solo Project", src: video("minecraft.mp4") },
   { title: "Space Parallax", badge: "Solo Project", src: video("web-games1.mp4") },
   { title: "Babusar Top Poster in AfterEffects", badge: "Solo Project", src: video("poster_1.mp4") },
   { title: "VR Games Hub", badge: "Group Project", src: video("vrgames.mp4") },
   { title: "Tetris Game", badge: "Group Project", src: video("tetrisfast.mp4") },
-  { title: "Study Planner and Tracker App", badge: "Group Project", src: video("final vid.mp4") },
+  { title: "Development Company", badge: "Solo Project", src: video("Main.mp4") },
+  { title: "Poster", badge: "Solo Project", src: video("marathon.mp4") },
+  { title: "Tic Tac Toe", badge: "Group Project", src: video("tictactoe.mp4") },
+  { title: "3D Character(in making)", badge: "Group Project", src: video("fypchar.mp4") },
 ];
 
 const OWNER = {
@@ -23,14 +26,14 @@ const OWNER = {
   role: "Game Developer - Unity - Blender - Unreal Engine",
   fullName: "Rafia Gull", // TODO: change if different
   links: [
-    { label: "yourportfolio.com", href: "https://yourportfolio.com" }, // TODO
-    { label: "github.com/your-handle", href: "https://github.com/your-handle" }, // TODO
-    { label: "you@email.com", href: "hayahsajid08@gmail.com" }, // TODO
+    { label: "https://hyh-portfolio.vercel.app/", href: "https://hyh-portfolio.vercel.app/" }, // TODO
+    { label: "https://github.com/RafiaSajid", href: "https://github.com/RafiaSajid" }, // TODO
+    { label: "hayahsajid08@gmail.com", href: "hayahsajid08@gmail.com" }, // TODO
   ],
   cta: "Let’s build something together",
 };
 
-const BGM_SRC = "/assets/audio/bg-music.mp3";
+const BGM_SRC = "/assets/audio/bd-music.mp3";
 const BADGE_COLORS = { "Group Project": "#ff8a4c", "Solo Project": "#2fd9c5" };
 const DEFAULT_ACCENT = "#7c8cff";
 const INTRO_MS = 4000;

@@ -9,6 +9,14 @@
   <title>About Me | Rafia Gull - Game Developer</title>
   <script src="./src/theme/themeManager.js"></script>
   <link rel="stylesheet" href="./styles/style.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
 </head>
 
 <body class="page-mode about-page">
@@ -33,8 +41,11 @@
       </ul>
     </nav>
 
-    <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark theme" aria-describedby="theme-status" data-theme-toggle>
-      <span class="theme-orbit" aria-hidden="true"><span class="theme-orbit-planet"></span><span class="theme-star one"></span><span class="theme-star two"></span><span class="theme-star three"></span></span>
+    <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark theme"
+      aria-describedby="theme-status" data-theme-toggle>
+      <span class="theme-orbit" aria-hidden="true"><span class="theme-orbit-planet"></span><span
+          class="theme-star one"></span><span class="theme-star two"></span><span
+          class="theme-star three"></span></span>
       <span class="theme-thumb" aria-hidden="true"></span>
     </button>
     <span id="theme-status" class="sr-only" role="status" aria-live="polite" data-theme-status></span>
@@ -193,6 +204,12 @@
 
     <div id="skills-details" class="about-grid skills-details-grid" aria-label="Skill descriptions"></div>
 
+    <!-- Portfolio Showcase Section -->
+    <div class="section-heading" id="showcase-section">
+      <h2>PORTFOLIO SHOWCASE</h2>
+    </div>
+    <div id="showcase-root" style="margin-bottom: 3rem;"></div>
+
     <!-- Interactive Contact Form Section -->
     <div class="section-heading" id="contact-section">
       <h2>CONTACT</h2>
@@ -288,7 +305,8 @@
         <div class="footer-brand">
           <div class="footer-title">RAFIA GULL</div>
           <div class="footer-subtitle">Aspiring Game Developer • Gaming & Animation</div>
-          <p class="footer-summary">Computer Science student at NED University specializing in Gaming and Animation. Building 2D, 3D, and VR projects in Unity and Unreal Engine.</p>
+          <p class="footer-summary">Computer Science student at NED University specializing in Gaming and Animation.
+            Building 2D, 3D, and VR projects in Unity and Unreal Engine.</p>
         </div>
         <div class="footer-nav-groups">
           <div class="footer-nav-col">
@@ -323,7 +341,8 @@
   </footer>
 
   <!-- Legal Modal Dialog -->
-  <div id="legal-modal" class="legal-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="legal-modal-title" aria-hidden="true">
+  <div id="legal-modal" class="legal-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="legal-modal-title"
+    aria-hidden="true">
     <div class="legal-modal-box">
       <div class="legal-modal-header">
         <h3 id="legal-modal-title">LEGAL NOTICE</h3>
@@ -338,7 +357,9 @@
     import { PerspectiveGrid } from './src/contact/perspectiveGrid.js';
     import { FooterManager } from './src/ui/footerManager.js';
     import { portfolioData } from './src/data/portfolioData.js';
+    import { mountShowcase } from './src/components/PortfolioShowcase.js';
 
+    mountShowcase(document.getElementById('showcase-root'));
     new ContactManager('contact-form', 'contact-feedback');
     new PerspectiveGrid('.contact-card-container');
     new FooterManager();
