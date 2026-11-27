@@ -32,9 +32,9 @@ export const customCharactersConfig = [
     }
   },
   {
-    id: 'archive-curator-drone',
-    label: 'Archive Guide',
-    modelPath: null,
+    id: '3D Character',
+    label: '3D Character',
+    modelPath: './assets/characters/3d-char.glb',
     destination: 'about',
     position: { x: -6, y: 0, z: 122 },
     scale: 0.6,

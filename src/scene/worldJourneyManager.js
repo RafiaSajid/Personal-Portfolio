@@ -67,7 +67,7 @@ export class WorldJourneyManager {
       this.destination = destinationId;
       const center = DESTINATION_CENTERS[destinationId];
       this.avatar.clearCameraFocus?.();
-      this.avatar.warpTo(center.x, 0, center.z + (destinationId === 'about' ? 18 : 36), Math.PI);
+      this.avatar.warpTo(center.x, 0, center.z + (this.destinations[destinationId]?.spawnZ ?? 18), Math.PI);
       this.currentNearbyPortal = null;
       this.currentNearbyExit = false;
       this.currentNearbyProject = null;

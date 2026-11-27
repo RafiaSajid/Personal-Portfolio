@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { portfolioData, skillOrbitGroups } from '../data/portfolioData.js';
+import { createPlanet, makeGlowTexture } from './environments.js';
 
 export class LandmarkManager {
   constructor(scene) {
@@ -85,6 +86,7 @@ export class LandmarkManager {
     portal.name = `${data.id} portal`;
     portal.position.y = -1.55;
     portal.rotation.y = data.portalRotation || 0;
+    portal.scale.setScalar(1.45); // larger, easier to spot from the spawn view
     const tint = data.color;
     const frameMaterial = new THREE.MeshStandardMaterial({
       color: 0x243443,
@@ -175,10 +177,10 @@ export class LandmarkManager {
     destination.position.set(position.x, 0, position.z);
     this.scene.add(destination);
     const platform = this.createLandingPlatform(data.color);
-    platform.scale.set(6.8, 1, 6.8);
+    platform.scale.set(9.2, 1, 9.2);
     destination.add(platform);
     const outerRing = new THREE.Mesh(
-      new THREE.TorusGeometry(25, 0.035, 8, 112),
+      new THREE.TorusGeometry(31, 0.035, 8, 112),
       new THREE.MeshBasicMaterial({ color: data.color, transparent: true, opacity: 0.32 })
     );
     outerRing.rotation.x = Math.PI / 2;
@@ -193,6 +195,8 @@ export class LandmarkManager {
       this.raycastTargets.push(planet.mesh);
     });
     landmark.exitPortal = this.addReturnPortal(destination, data.color);
+    landmark.exitPortal.position.set(0, 0, 33);
+    landmark.spawnZ = 25;
     return landmark;
   }
 
@@ -200,6 +204,7 @@ export class LandmarkManager {
     const root = new THREE.Group();
     root.name = 'Home return portal';
     root.position.set(0, 0, 25);
+    root.rotation.y = Math.PI; // aperture faces the interior of the destination
     const frame = new THREE.Mesh(
       new THREE.TorusGeometry(2.35, 0.16, 12, 56),
       new THREE.MeshStandardMaterial({ color: 0x233342, emissive: color, emissiveIntensity: 0.26, roughness: 0.38, metalness: 0.7 })
@@ -225,56 +230,262 @@ export class LandmarkManager {
 
   addProjectsDestination(position) {
     const center = new THREE.Group();
-    center.name = 'Projects space gallery';
+    center.name = 'Projects mission-archive station';
     center.position.set(position.x, 0, position.z);
     this.scene.add(center);
     const data = portfolioData.landmarks.find((landmark) => landmark.id === 'projects');
-    const perimeter = new THREE.Mesh(
-      new THREE.TorusGeometry(36, 0.035, 8, 128),
-      new THREE.MeshBasicMaterial({ color: data.color, transparent: true, opacity: 0.28 })
+
+    // Station deck: circular gridded floor, glowing rim and light posts.
+    const deckCanvas = document.createElement('canvas');
+    deckCanvas.width = deckCanvas.height = 512;
+    const dctx = deckCanvas.getContext('2d');
+    dctx.fillStyle = '#08130f';
+    dctx.fillRect(0, 0, 512, 512);
+    dctx.strokeStyle = 'rgba(111,209,176,0.3)';
+    dctx.lineWidth = 2;
+    for (let i = 0; i <= 512; i += 32) {
+      dctx.beginPath(); dctx.moveTo(i, 0); dctx.lineTo(i, 512); dctx.stroke();
+      dctx.beginPath(); dctx.moveTo(0, i); dctx.lineTo(512, i); dctx.stroke();
+    }
+    const deckTex = new THREE.CanvasTexture(deckCanvas);
+    deckTex.wrapS = deckTex.wrapT = THREE.RepeatWrapping;
+    deckTex.repeat.set(5, 5);
+    deckTex.colorSpace = THREE.SRGBColorSpace;
+    const deck = new THREE.Mesh(
+      new THREE.CircleGeometry(40, 96),
+      new THREE.MeshStandardMaterial({ map: deckTex, color: 0xffffff, roughness: 0.55, metalness: 0.55 })
     );
-    perimeter.rotation.x = Math.PI / 2;
-    perimeter.position.y = -1.18;
-    center.add(perimeter);
+    deck.rotation.x = -Math.PI / 2;
+    deck.position.y = -1.18;
+    deck.receiveShadow = true;
+    center.add(deck);
+    const rim = new THREE.Mesh(
+      new THREE.TorusGeometry(40, 0.16, 10, 128),
+      new THREE.MeshStandardMaterial({ color: 0x14202c, emissive: data.color, emissiveIntensity: 0.7, roughness: 0.4, metalness: 0.6 })
+    );
+    rim.rotation.x = Math.PI / 2;
+    rim.position.y = -1.1;
+    center.add(rim);
+    const postCount = 24;
+    const posts = new THREE.InstancedMesh(
+      new THREE.CylinderGeometry(0.12, 0.16, 2.2, 8),
+      new THREE.MeshStandardMaterial({ color: 0x1b2a38, emissive: data.color, emissiveIntensity: 0.5 }),
+      postCount
+    );
+    const matrix = new THREE.Matrix4();
+    for (let i = 0; i < postCount; i += 1) {
+      const a = (i / postCount) * Math.PI * 2;
+      matrix.makeTranslation(Math.cos(a) * 40, -0.05, Math.sin(a) * 40);
+      posts.setMatrixAt(i, matrix);
+    }
+    center.add(posts);
+
     const projects = [...portfolioData.projects].sort((a, b) => (a.order || 99) - (b.order || 99));
     const colors = [0x8fc9e5, 0xe8c77b, 0x77c7b2, 0x91aee7, 0xd28c8c, 0xa3b8c4, 0xd6ad6f];
     const displayMeshes = [];
     const projectDisplays = [];
-    projects.forEach((project, index) => {
-      const angle = index * 2.399963229728653;
-      const radius = 12 + (index % 2) * 5;
-      const stand = new THREE.Group();
-      stand.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
-      const tint = colors[index % colors.length];
-      const pedestal = new THREE.Mesh(
-        new THREE.CylinderGeometry(1.2, 1.55, 0.72, 20),
-        new THREE.MeshStandardMaterial({ color: 0x111d29, emissive: tint, emissiveIntensity: 0.12, roughness: 0.68, metalness: 0.38 })
-      );
-      pedestal.position.y = -0.78;
-      stand.add(pedestal);
-      const coreGeo = index % 3 === 0
-        ? new THREE.IcosahedronGeometry(1.25, 1)
-        : index % 3 === 1 ? new THREE.DodecahedronGeometry(1.15, 0) : new THREE.OctahedronGeometry(1.2, 0);
-      const core = new THREE.Mesh(coreGeo, new THREE.MeshStandardMaterial({ color: tint, emissive: tint, emissiveIntensity: 0.34, roughness: 0.4, metalness: 0.26 }));
-      core.position.y = 1.15;
-      core.userData.projectId = project.id;
-      core.userData.destinationId = 'projects';
-      stand.add(core);
-      const label = this.createProjectLabel(project.title, project.category, tint);
-      label.position.set(0, 3.65, 0);
-      stand.add(label);
-      center.add(stand);
-      displayMeshes.push(core);
-      projectDisplays.push({ project, mesh: core });
+    this.projectExhibits = [];
+
+    // Two concentric arcs; the gap at +z is where the return portal sits.
+    const innerCount = Math.min(5, projects.length);
+    const rings = [
+      { r: 15, items: projects.slice(0, innerCount) },
+      { r: 26, items: projects.slice(innerCount) }
+    ];
+    rings.forEach((ring, ringIndex) => {
+      const m = ring.items.length;
+      ring.items.forEach((project, i) => {
+        const index = projects.indexOf(project);
+        const arc = 2 * Math.PI - 1.1;
+        const angle = Math.PI / 2 + 0.55 + (m === 1 ? arc / 2 : (i * arc) / (m - 1)) + (ringIndex ? 0.2 : 0);
+        const x = Math.cos(angle) * ring.r;
+        const z = Math.sin(angle) * ring.r;
+        const tint = colors[index % colors.length];
+        const stand = new THREE.Group();
+        stand.position.set(x, 0, z);
+        stand.rotation.y = Math.atan2(-x, -z);
+        const pedestal = new THREE.Mesh(
+          new THREE.CylinderGeometry(1.5, 1.9, 0.5, 24),
+          new THREE.MeshStandardMaterial({ color: 0x0e1822, emissive: tint, emissiveIntensity: 0.18, roughness: 0.5, metalness: 0.6 })
+        );
+        pedestal.position.y = -0.9;
+        stand.add(pedestal);
+        const stem = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.1, 0.1, 1.5, 8),
+          new THREE.MeshBasicMaterial({ color: tint })
+        );
+        stem.position.y = -0.1;
+        stand.add(stem);
+
+        const cardTexture = this.createProjectCardTexture(project, tint);
+        const screen = new THREE.Mesh(
+          new THREE.PlaneGeometry(4.2, 2.36),
+          new THREE.MeshBasicMaterial({ map: cardTexture, toneMapped: false, transparent: true })
+        );
+        screen.position.y = 2.2;
+        screen.userData.projectId = project.id;
+        screen.userData.destinationId = 'projects';
+        stand.add(screen);
+        const frame = new THREE.LineSegments(
+          new THREE.EdgesGeometry(new THREE.BoxGeometry(4.36, 2.52, 0.08)),
+          new THREE.LineBasicMaterial({ color: tint })
+        );
+        frame.position.set(0, 2.2, -0.02);
+        stand.add(frame);
+        const backGlow = new THREE.Mesh(
+          new THREE.PlaneGeometry(5.4, 3.3),
+          new THREE.MeshBasicMaterial({ color: tint, transparent: true, opacity: 0.1, blending: THREE.AdditiveBlending, depthWrite: false })
+        );
+        backGlow.position.set(0, 2.2, -0.08);
+        stand.add(backGlow);
+
+        center.add(stand);
+        displayMeshes.push(screen);
+        projectDisplays.push({ project, mesh: screen });
+        const exhibit = { project, screen, stand, cardTexture, tint, video: null, videoTexture: null, thumbLoaded: false };
+        exhibit.videoSrc = /\.(mp4|webm)(\?.*)?$/i.test(project.videoUrl || '') ? project.videoUrl : null;
+        this.projectExhibits.push(exhibit);
+        this.loadProjectThumbnail(exhibit);
+      });
     });
+
     const exitPortal = this.addReturnPortal(center, data.color);
-    exitPortal.position.set(0, 0, 30);
-    const landmark = { data: { ...data, position: { ...position } }, group: center, visuals: { type: 'projects-gallery', displayMeshes }, exitPortal, activationRadius: 44, projects, projectDisplays };
+    exitPortal.position.set(0, 0, 41);
+    const landmark = { spawnZ: 32, data: { ...data, position: { ...position } }, group: center, visuals: { type: 'projects-gallery', displayMeshes }, exitPortal, activationRadius: 44, projects, projectDisplays };
     displayMeshes.forEach((mesh) => {
       mesh.userData.landmark = landmark;
       this.raycastTargets.push(mesh);
     });
     return landmark;
+  }
+
+  drawProjectCard(exhibit, image = null) {
+    const { project, tint, cardTexture } = exhibit;
+    const canvas = cardTexture.image;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    const hex = `#${tint.toString(16).padStart(6, '0')}`;
+    const bg = ctx.createLinearGradient(0, 0, w, h);
+    bg.addColorStop(0, '#0f0b16');
+    bg.addColorStop(1, '#1d1424');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, w, h);
+    if (image) {
+      const scale = Math.max(w / image.width, h / image.height);
+      const iw = image.width * scale, ih = image.height * scale;
+      ctx.drawImage(image, (w - iw) / 2, (h - ih) / 2, iw, ih);
+      const fade = ctx.createLinearGradient(0, h * 0.35, 0, h);
+      fade.addColorStop(0, 'rgba(4,10,16,0)');
+      fade.addColorStop(1, 'rgba(4,10,16,0.92)');
+      ctx.fillStyle = fade;
+      ctx.fillRect(0, 0, w, h);
+    }
+    ctx.strokeStyle = hex;
+    ctx.lineWidth = 6;
+    ctx.strokeRect(3, 3, w - 6, h - 6);
+
+    // Category chip
+    ctx.font = '700 22px "Segoe UI", sans-serif';
+    const cat = project.category.toUpperCase();
+    const cw = ctx.measureText(cat).width + 32;
+    ctx.fillStyle = hex;
+    ctx.fillRect(28, 26, cw, 36);
+    ctx.fillStyle = '#04101a';
+    ctx.fillText(cat, 44, 52);
+
+    // Title (wrapped, max 3 lines)
+    ctx.fillStyle = '#f4f8fb';
+    ctx.font = '800 44px "Segoe UI", sans-serif';
+    const words = project.title.split(' ');
+    const lines = [];
+    let line = '';
+    words.forEach((word) => {
+      const test = line ? `${line} ${word}` : word;
+      if (ctx.measureText(test).width > w - 64 && line) { lines.push(line); line = word; } else { line = test; }
+    });
+    lines.push(line);
+    const shown = lines.slice(0, 3);
+    const baseY = image ? h - 96 - (shown.length - 1) * 50 : 130;
+    shown.forEach((l, i) => ctx.fillText(l, 28, baseY + i * 50, w - 56));
+
+    // Technology tags
+    ctx.font = '600 20px "Segoe UI", sans-serif';
+    let tx = 28;
+    const ty = h - 40;
+    (project.technologies || []).slice(0, 5).forEach((tech) => {
+      const tw = ctx.measureText(tech).width + 24;
+      if (tx + tw > w - 20) return;
+      ctx.fillStyle = 'rgba(255,255,255,0.12)';
+      ctx.fillRect(tx, ty - 24, tw, 32);
+      ctx.strokeStyle = hex;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(tx, ty - 24, tw, 32);
+      ctx.fillStyle = '#dbe7ef';
+      ctx.fillText(tech, tx + 12, ty);
+      tx += tw + 10;
+    });
+    cardTexture.needsUpdate = true;
+  }
+
+  createProjectCardTexture(project, tint) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 768;
+    canvas.height = 432;
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = 4;
+    this.drawProjectCard({ project, tint, cardTexture: texture });
+    return texture;
+  }
+
+  loadProjectThumbnail(exhibit) {
+    const src = exhibit.project.thumbnail;
+    if (!src) return;
+    const img = new Image();
+    img.onload = () => { exhibit.thumbLoaded = true; this.drawProjectCard(exhibit, img); };
+    img.onerror = () => { /* missing image: keep the generated card */ };
+    img.src = src;
+  }
+
+  /** Play project videos only while the player is near and the station is active. */
+  updateProjectMedia(playerPos) {
+    const exhibits = this.projectExhibits;
+    if (!exhibits?.length) return;
+    const area = this.destinationLandmarks.find((l) => l.data.id === 'projects');
+    const active = Boolean(area?.group.visible);
+    exhibits.forEach((ex) => {
+      if (!ex.videoSrc) return;
+      const near = active && ex.stand.getWorldPosition(this._tmpVec || (this._tmpVec = new THREE.Vector3())).distanceTo(playerPos) < 16;
+      if (near) {
+        if (!ex.video) {
+          const v = document.createElement('video');
+          v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'auto'; v.crossOrigin = 'anonymous';
+          v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+          v.src = ex.videoSrc;
+          ex.video = v;
+          ex.videoTexture = new THREE.VideoTexture(v);
+          ex.videoTexture.colorSpace = THREE.SRGBColorSpace;
+        }
+        if (ex.video.paused) ex.video.play().catch(() => {});
+        if (ex.video.readyState >= 2 && ex.screen.material.map !== ex.videoTexture) {
+          ex.screen.material.map = ex.videoTexture;
+          ex.screen.material.needsUpdate = true;
+        }
+      } else if (ex.video) {
+        this.releaseExhibitVideo(ex);
+      }
+    });
+  }
+
+  releaseExhibitVideo(ex) {
+    ex.video.pause();
+    ex.video.removeAttribute('src');
+    ex.video.load();
+    ex.videoTexture?.dispose();
+    ex.screen.material.map = ex.cardTexture;
+    ex.screen.material.needsUpdate = true;
+    ex.video = null;
+    ex.videoTexture = null;
   }
 
   addAboutDestination(position) {
@@ -286,7 +497,7 @@ export class LandmarkManager {
     const data = portfolioData.landmarks.find((landmark) => landmark.id === 'about') || {
       id: 'about',
       title: 'About Me',
-      color: 0x8b5cf6
+      color: 0xd06aa8
     };
 
     // 1. Orbital Station Deck Platform
@@ -306,7 +517,7 @@ export class LandmarkManager {
     // Secondary floating structural truss
     const trussRing = new THREE.Mesh(
       new THREE.TorusGeometry(18, 0.03, 6, 96),
-      new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.22 })
+      new THREE.MeshBasicMaterial({ color: 0xf2b45a, transparent: true, opacity: 0.22 })
     );
     trussRing.rotation.x = Math.PI / 2.2;
     trussRing.position.y = 2.4;
@@ -357,7 +568,7 @@ export class LandmarkManager {
         subtitle: 'VR Games Hub • Haptics & Mechanics',
         category: 'VR GAME WORK',
         position: { x: 0, y: 0, z: -9.5 },
-        tint: 0x0ea5e9,
+        tint: 0x6fd1b0,
         buildMesh: () => {
           const g = new THREE.Group();
           // Circular simulation pod base
@@ -370,7 +581,7 @@ export class LandmarkManager {
           // Dual gyroscopic sensor rings
           const r1 = new THREE.Mesh(
             new THREE.TorusGeometry(1.2, 0.06, 8, 36),
-            new THREE.MeshStandardMaterial({ color: 0x0ea5e9, emissive: 0x0284c7, emissiveIntensity: 0.9 })
+            new THREE.MeshStandardMaterial({ color: 0x6fd1b0, emissive: 0x0284c7, emissiveIntensity: 0.9 })
           );
           r1.position.y = 1.3;
           const r2 = r1.clone();
@@ -379,7 +590,7 @@ export class LandmarkManager {
           // Central glowing simulation core
           const core = new THREE.Mesh(
             new THREE.IcosahedronGeometry(0.65, 1),
-            new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0284c7, emissiveIntensity: 1.2, roughness: 0.1, metalness: 0.8 })
+            new THREE.MeshStandardMaterial({ color: 0xf2b45a, emissive: 0x0284c7, emissiveIntensity: 1.2, roughness: 0.1, metalness: 0.8 })
           );
           core.position.y = 1.3;
           g.add(core);
@@ -453,6 +664,7 @@ export class LandmarkManager {
     exitPortal.position.set(0, 0, 24);
 
     const landmark = {
+      spawnZ: 15,
       data: { ...data, position: { ...position } },
       group: station,
       visuals: { type: 'about-station', displayMeshes: exhibitMeshes },
@@ -660,7 +872,7 @@ export class LandmarkManager {
     // Central core icosahedron
     const coreGeo = new THREE.IcosahedronGeometry(1.3, 1);
     const coreMat = new THREE.MeshStandardMaterial({
-      color: 0x8b5cf6,
+      color: 0xd06aa8,
       emissive: 0x7c3aed,
       emissiveIntensity: 1.2,
       roughness: 0.2,
@@ -711,7 +923,7 @@ export class LandmarkManager {
     // Octahedral crystalline core
     const coreGeo = new THREE.OctahedronGeometry(1.5, 0);
     const coreMat = new THREE.MeshStandardMaterial({
-      color: 0x0ea5e9,
+      color: 0x6fd1b0,
       emissive: 0x0284c7,
       emissiveIntensity: 1.2,
       roughness: 0.1,
@@ -722,7 +934,7 @@ export class LandmarkManager {
 
     // Outer square ring
     const ringGeo = new THREE.TorusGeometry(2.5, 0.09, 4, 4);
-    const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0xf2b45a });
     const ring = new THREE.Mesh(ringGeo, ringMat);
     group.add(ring);
 
@@ -731,7 +943,7 @@ export class LandmarkManager {
     for (let i = 0; i < 4; i++) {
       const cubeGeo = new THREE.BoxGeometry(0.45, 0.45, 0.45);
       const cubeMat = new THREE.MeshStandardMaterial({
-        color: 0x38bdf8,
+        color: 0xf2b45a,
         emissive: 0x0284c7,
         emissiveIntensity: 0.7,
         wireframe: true
@@ -799,78 +1011,133 @@ export class LandmarkManager {
 
   // Landmark 4: SKILLS (Amber Gold Solar Prism)
   buildSkillsLandmark(parent, data) {
+    // A small solar system: a lit star at the centre and one planet per skill
+    // category on its own inclined orbit (tilt group -> spinning pivot -> body).
     const group = new THREE.Group();
+    group.position.y = 2.4;
+    const glow = makeGlowTexture();
 
-    // A compact controller-shaped core with six labeled planets in the existing scene.
-    const coreGeo = new THREE.BoxGeometry(1.28, 0.46, 0.58);
-    const coreMat = new THREE.MeshStandardMaterial({
-      color: 0x20364b,
-      emissive: 0x0c4a6e,
-      emissiveIntensity: 0.65,
-      roughness: 0.4,
-      metalness: 0.35
-    });
-    const core = new THREE.Mesh(coreGeo, coreMat);
+    const core = new THREE.Mesh(
+      new THREE.SphereGeometry(2.6, 48, 32),
+      new THREE.MeshBasicMaterial({ color: 0xffb347 })
+    );
     group.add(core);
+    const coronaA = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow, color: 0xff9a2e, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+    coronaA.scale.setScalar(13);
+    const coronaB = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow, color: 0xffe2a0, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+    coronaB.scale.setScalar(7.5);
+    group.add(coronaA, coronaB);
+    const starLight = new THREE.PointLight(0xffc680, 3.2, 0, 0);
+    group.add(starLight);
 
-    const gripGeo = new THREE.SphereGeometry(0.32, 16, 12);
-    [-1, 1].forEach((side) => {
-      const grip = new THREE.Mesh(gripGeo, coreMat);
-      grip.position.set(side * 0.48, -0.22, 0.03);
-      grip.scale.set(0.8, 1.2, 0.85);
-      group.add(grip);
-    });
-    const buttonMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0284c7, emissiveIntensity: 0.8 });
-    const faceButtonGeo = new THREE.SphereGeometry(0.075, 12, 8);
-    [[0.34, 0.1], [0.5, 0], [0.34, -0.1], [0.18, 0]].forEach(([x, y]) => {
-      const faceButton = new THREE.Mesh(faceButtonGeo, buttonMat);
-      faceButton.position.set(x, y, 0.33);
-      group.add(faceButton);
-    });
-    const dpadGeo = new THREE.BoxGeometry(0.08, 0.26, 0.06);
-    const dpadVertical = new THREE.Mesh(dpadGeo, buttonMat);
-    dpadVertical.position.set(-0.35, 0.03, 0.32);
-    const dpadHorizontal = new THREE.Mesh(dpadGeo, buttonMat);
-    dpadHorizontal.rotation.z = Math.PI / 2;
-    dpadHorizontal.position.copy(dpadVertical.position);
-    group.add(dpadVertical, dpadHorizontal);
-
-    // Tilted orbit path and data-driven category planets.
-    const haloGeo = new THREE.TorusGeometry(10.8, 0.035, 8, 112);
-    const haloMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.65 });
-    const halo = new THREE.Mesh(haloGeo, haloMat);
+    const halo = new THREE.Mesh(
+      new THREE.TorusGeometry(31, 0.02, 6, 160),
+      new THREE.MeshBasicMaterial({ color: 0xffb347, transparent: true, opacity: 0.12 })
+    );
     halo.rotation.x = Math.PI / 2;
-    halo.rotation.z = Math.PI / 8;
     group.add(halo);
 
-    const planetColors = [0x38bdf8, 0xf59e0b, 0x34d399, 0x60a5fa, 0xfb7185, 0xe2e8f0];
-    const planetGeo = new THREE.SphereGeometry(0.68, 24, 16);
+    const planetDefs = [
+      { r: 1.3, orbit: 8.5, incl: 0.05, ring: null, atmo: 0x6fb7ff, pal: { c1: 0x1d5fa8, c2: 0x2e9d6b, c3: 0xe8e2c8, rim: 0x7cc4ff }, bands: 4, seed: 3 },
+      { r: 1.95, orbit: 13, incl: -0.08, ring: { color: 0xf0d6a8, inner: 1.5, outer: 2.2, tilt: 0.45 }, atmo: 0xffb36b, pal: { c1: 0xc4783a, c2: 0xf0c987, c3: 0x8a4b22, rim: 0xffc38a }, bands: 9, seed: 7 },
+      { r: 1.45, orbit: 17.5, incl: 0.1, ring: null, atmo: 0x9fe8ff, pal: { c1: 0x3a8fb0, c2: 0xd8f6ff, c3: 0x7fd6e8, rim: 0xbff2ff }, bands: 5, seed: 11, ice: 1 },
+      { r: 1.15, orbit: 22, incl: -0.06, ring: null, atmo: 0x7affd0, pal: { c1: 0x2a6a4b, c2: 0x7ad39a, c3: 0x1a3a2a, rim: 0x7affd0 }, bands: 3, seed: 17 },
+      { r: 1.6, orbit: 26.5, incl: 0.09, ring: null, atmo: 0xff9a7a, pal: { c1: 0xb5483a, c2: 0xe08a64, c3: 0x6e2a22, rim: 0xffa58a }, bands: 6, seed: 23 },
+      { r: 1.75, orbit: 30.5, incl: -0.04, ring: { color: 0xe6d9ae, inner: 1.4, outer: 2.0, tilt: 0.3 }, atmo: 0xf2e6bd, pal: { c1: 0xd9c89a, c2: 0xf2e6bd, c3: 0xa8935c, rim: 0xfff0c8 }, bands: 7, seed: 29 }
+    ];
+    const labelColors = [0xf2b45a, 0xf59e0b, 0x34d399, 0xe0709a, 0xfb7185, 0xe2e8f0];
+
     const skillPlanets = skillOrbitGroups.map((skillGroup, index) => {
-      const color = planetColors[index % planetColors.length];
-      const material = new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.42, roughness: 0.45, metalness: 0.12 });
-      const mesh = new THREE.Mesh(planetGeo, material);
-      mesh.userData.skillGroup = skillGroup.label;
-      const ring = new THREE.Mesh(
-      new THREE.TorusGeometry(0.92, 0.025, 6, 40),
-        new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.72 })
+      const def = planetDefs[index % planetDefs.length];
+      const color = labelColors[index % labelColors.length];
+      const tilt = new THREE.Group();
+      tilt.rotation.x = def.incl;
+      tilt.rotation.z = def.incl * 0.6;
+      group.add(tilt);
+
+      // Orbit path
+      const pts = [];
+      for (let i = 0; i <= 160; i += 1) {
+        const a = (i / 160) * Math.PI * 2;
+        pts.push(new THREE.Vector3(Math.cos(a) * def.orbit, 0, Math.sin(a) * def.orbit));
+      }
+      const orbitLine = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(pts),
+        new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.28 })
       );
-      ring.rotation.x = Math.PI / 2.5;
-      mesh.add(ring);
+      tilt.add(orbitLine);
+
+      const pivot = new THREE.Group();
+      tilt.add(pivot);
+      const body = new THREE.Group();
+      body.position.set(def.orbit, 0, 0);
+      pivot.add(body);
+
+      const planet = createPlanet({ radius: def.r, palette: def.pal, atmosphere: def.atmo, ring: def.ring, seed: def.seed, bands: def.bands, ice: def.ice || 0 });
+      const mesh = planet.body;
+      mesh.userData.skillGroup = skillGroup.label;
+      body.add(planet.group);
+
       const label = this.createSkillLabel(skillGroup.label, color);
+      label.position.set(0, def.r + 1.5, 0);
+      body.add(label);
+
+      // One small moon per skill name (names themselves appear in the selector/details).
+      const moons = skillGroup.names.map((_, moonIndex) => {
+        const moonPivot = new THREE.Group();
+        const moon = new THREE.Mesh(
+          new THREE.SphereGeometry(0.16, 12, 10),
+          new THREE.MeshStandardMaterial({ color: 0xd9e2ea, emissive: color, emissiveIntensity: 0.25, roughness: 0.8 })
+        );
+        const moonRadius = def.r + 0.9 + moonIndex * 0.38;
+        moon.position.set(moonRadius, 0, 0);
+        moonPivot.add(moon);
+        moonPivot.rotation.x = 0.35 * (moonIndex % 2 ? 1 : -1);
+        moonPivot.rotation.y = (moonIndex * Math.PI * 2) / skillGroup.names.length;
+        body.add(moonPivot);
+        return { pivot: moonPivot, speed: 0.9 - moonIndex * 0.15 };
+      });
+
       const phase = (index * Math.PI * 2) / skillOrbitGroups.length;
-      mesh.position.set(Math.cos(phase) * 10.8, 0, Math.sin(phase) * 10.8);
-      label.position.set(mesh.position.x, 0.82, mesh.position.z);
-      group.add(mesh, label);
-      return { mesh, label, phase, radius: 10.8 };
+      const speed = 0.42 / Math.pow(def.orbit / 8.5, 1.5);
+      return { mesh, planet, label, phase, radius: def.orbit, pivot, body, moons, speed, approachRadius: def.r + 3.4 };
     });
 
-    const hitGeo = new THREE.SphereGeometry(0.92, 16, 12);
-    const hitMat = new THREE.MeshBasicMaterial({ visible: false });
-    const hitMesh = new THREE.Mesh(hitGeo, hitMat);
+    const hitMesh = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 4), new THREE.MeshBasicMaterial({ visible: false }));
     group.add(hitMesh);
 
     parent.add(group);
-    return { group, core, skillPlanets, halo, hitMesh, type: 'skills' };
+    return { group, core, coronaA, coronaB, skillPlanets, halo, hitMesh, type: 'skills' };
+  }
+
+  updateSkillsOrbit(v, delta, playerPos) {
+    const orbitTime = this.reduceMotion ? 0 : this.time;
+    const starWorld = this._starWorld || (this._starWorld = new THREE.Vector3());
+    const planetWorld = this._planetWorld || (this._planetWorld = new THREE.Vector3());
+    const dir = this._lightDir || (this._lightDir = new THREE.Vector3());
+    v.core.getWorldPosition(starWorld);
+    v.core.rotation.y += this.reduceMotion ? 0 : delta * 0.05;
+    const pulse = 1 + Math.sin(orbitTime * 1.6) * 0.04;
+    v.coronaA.scale.setScalar(13 * pulse);
+    v.coronaB.scale.setScalar(7.5 / pulse);
+
+    let nearestIndex = null;
+    let nearestDistance = Infinity;
+    v.skillPlanets.forEach((p, index) => {
+      p.pivot.rotation.y = -orbitTime * p.speed + p.phase;
+      if (!this.reduceMotion) p.mesh.rotation.y += delta * 0.3;
+      p.moons.forEach((m) => { m.pivot.rotation.y = orbitTime * m.speed * 1.6; });
+      p.mesh.getWorldPosition(planetWorld);
+      dir.copy(starWorld).sub(planetWorld).normalize();
+      p.mesh.material.uniforms.uLightDir.value.copy(dir);
+      const distance = planetWorld.distanceTo(playerPos) - p.approachRadius;
+      if (distance < nearestDistance) { nearestDistance = distance; nearestIndex = index; }
+    });
+    const approachedIndex = nearestDistance <= 0 ? nearestIndex : null;
+    if (approachedIndex !== this.approachedSkillGroup) {
+      this.approachedSkillGroup = approachedIndex;
+      window.dispatchEvent(new CustomEvent('portfolio:skill-approach', { detail: { index: approachedIndex } }));
+    }
   }
 
   update(delta, playerPos, onProximityChanged) {
@@ -981,28 +1248,10 @@ export class LandmarkManager {
     });
 
     this.destinationLandmarks.forEach((item) => {
-      if (item.visuals.type !== 'skills') return;
-      const orbitTime = this.reduceMotion ? 0 : this.time;
-      item.visuals.core.rotation.y = Math.sin(orbitTime * 0.35) * 0.12;
-      item.visuals.halo.rotation.z = Math.PI / 8 + Math.sin(orbitTime * 0.18) * 0.08;
-      item.visuals.skillPlanets.forEach((planet) => {
-        const angle = -orbitTime * 0.22 + planet.phase;
-        const x = Math.cos(angle) * planet.radius;
-        const z = Math.sin(angle) * planet.radius;
-        const y = Math.sin(angle * 1.4) * 0.62;
-        planet.mesh.position.set(x, y, z);
-        if (!this.reduceMotion) planet.mesh.rotation.y += delta * 0.28;
-        planet.label.position.set(x, y + 1.2, z);
-      });
-      const nearest = item.visuals.skillPlanets
-        .map((planet, index) => ({ index, distance: planet.mesh.getWorldPosition(new THREE.Vector3()).distanceTo(playerPos) }))
-        .sort((a, b) => a.distance - b.distance)[0];
-      const approachedIndex = nearest?.distance <= 3.4 ? nearest.index : null;
-      if (approachedIndex !== this.approachedSkillGroup) {
-        this.approachedSkillGroup = approachedIndex;
-        window.dispatchEvent(new CustomEvent('portfolio:skill-approach', { detail: { index: approachedIndex } }));
-      }
+      if (item.visuals.type !== 'skills' || !item.group.visible) return;
+      this.updateSkillsOrbit(item.visuals, delta, playerPos);
     });
+    this.updateProjectMedia(playerPos);
     this.destinationLandmarks.forEach((item) => {
       const portal = item.exitPortal;
       if (portal?.userData.openingProgress == null) return;
@@ -1049,8 +1298,8 @@ export class LandmarkManager {
     const selectedIndex = Math.max(0, Math.min(skills.length - 1, Number(index) || 0));
     skills.forEach((planet, planetIndex) => {
       const selected = planetIndex === selectedIndex;
-      planet.mesh.scale.setScalar(selected ? 1.22 : 1);
-      planet.mesh.material.emissiveIntensity = selected ? 1.05 : 0.42;
+      planet.planet.group.scale.setScalar(selected ? 1.18 : 1);
+      planet.mesh.material.uniforms.uBoost.value = selected ? 1 : 0;
       planet.mesh.userData.selected = selected;
     });
     const focus = new THREE.Vector3();

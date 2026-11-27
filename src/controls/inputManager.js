@@ -18,7 +18,9 @@ export class InputManager {
       backward: false,
       left: false,
       right: false,
-      sprint: false
+      sprint: false,
+      up: false,
+      down: false
     };
 
     // D-Pad state for mobile
@@ -75,6 +77,14 @@ export class InputManager {
         case 'ShiftRight':
           this.keys.sprint = true;
           break;
+        case 'Space':
+          this.keys.up = true;
+          if (window.__shipFlying) e.preventDefault();
+          break;
+        case 'KeyC':
+        case 'ControlLeft':
+          this.keys.down = true;
+          break;
         case 'KeyE':
         case 'Enter':
           if (this.onInteract) this.onInteract();
@@ -112,6 +122,13 @@ export class InputManager {
         case 'ShiftLeft':
         case 'ShiftRight':
           this.keys.sprint = false;
+          break;
+        case 'Space':
+          this.keys.up = false;
+          break;
+        case 'KeyC':
+        case 'ControlLeft':
+          this.keys.down = false;
           break;
       }
       this.updateMovement();

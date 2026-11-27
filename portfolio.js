@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { SpaceScene } from './src/scene/spaceScene.js';
 import { LandmarkManager } from './src/scene/landmarks.js';
 import { WorldJourneyManager } from './src/scene/worldJourneyManager.js';
+import { EnvironmentManager } from './src/scene/environments.js';
+import { ShipController } from './src/vehicle/shipController.js';
 import { AvatarController } from './src/character/avatarController.js';
 import { CustomNPCManager } from './src/character/npcManager.js';
 import { InputManager } from './src/controls/inputManager.js';
@@ -82,7 +84,7 @@ class PortfolioApp {
       65,
       window.innerWidth / window.innerHeight,
       0.1,
-      600
+      1800
     );
   }
 
@@ -101,7 +103,7 @@ class PortfolioApp {
 
     // 5. Input Manager (WASD, Arrows, touch D-Pad, mouse drag)
     this.input = new InputManager(this.renderer.domElement, {
-      onInteract: () => this.ui.handleInteract(),
+      onInteract: () => { if (this.ship?.handleInteract()) return; this.ui.handleInteract(); },
       onCameraRotate: (deltaYaw, deltaPitch) => this.avatar.rotateCamera(deltaYaw, deltaPitch),
       onCameraZoom: (deltaZoom) => this.avatar.zoomCamera(deltaZoom)
     });
@@ -115,6 +117,25 @@ class PortfolioApp {
     // 8. In-world Projects, Skills, and About Me environments, using the same scene/renderer.
     this.worldJourneys = new WorldJourneyManager(this.scene, this.avatar, this.landmarks);
 
+    // 8b. Per-portal environments (own sky, planets, lighting) on the same renderer.
+    this.environments = new EnvironmentManager({
+      scene: this.scene,
+      spaceScene: this.spaceScene,
+      landmarks: this.landmarks,
+      worldJourneys: this.worldJourneys,
+      avatar: this.avatar,
+      refreshTheme: () => { if (this.activeSceneTheme) this.applySceneTheme(this.activeSceneTheme); }
+    });
+    this.environments.setThemeName(this.themeName);
+
+    // 8c. Rideable starship parked beside the explorer.
+    this.ship = new ShipController({ scene: this.scene, camera: this.camera, avatar: this.avatar, input: this.input });
+    // The intro card is only for the first moment at home: gone once anyone moves, never shown in other areas.
+    this.hideIntro = () => document.getElementById('home-intro')?.classList.add('hidden');
+    window.addEventListener('portfolio:destination-change', (event) => {
+      if ((event.detail?.destination || 'home') !== 'home') this.hideIntro();
+    });
+
     // 9. HUD & Navigation UI Manager
     this.ui = new UIManager(this.avatar, this.audio, this.chat, this.worldJourneys);
   }
@@ -124,6 +145,8 @@ class PortfolioApp {
     if (!this.themeManager) return;
 
     this.unsubscribeTheme = this.themeManager.subscribe((_name, palette) => {
+      this.themeName = _name;
+      this.environments?.setThemeName(_name);
       const target = this.cloneTheme(palette.three);
       if (!this.activeSceneTheme || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         this.applySceneTheme(target);
@@ -156,6 +179,7 @@ class PortfolioApp {
     }
     this.spaceScene.applyTheme(theme);
     this.landmarks.applyTheme(theme);
+    this.environments?.applyOverlay();
   }
 
   updateThemeTransition() {
@@ -198,7 +222,8 @@ class PortfolioApp {
 
       this.raycaster.setFromCamera(this.mouse, this.camera);
       const targets = this.worldJourneys.getRaycastTargets();
-      const intersects = this.raycaster.intersectObjects(targets, true);
+      const treeVisible = (obj) => { for (let o = obj; o; o = o.parent) if (!o.visible) return false; return true; };
+      const intersects = this.raycaster.intersectObjects(targets, true).filter((hit) => treeVisible(hit.object));
 
       if (intersects.length > 0) {
         const selected = intersects[0].object;
@@ -250,10 +275,17 @@ class PortfolioApp {
     this.updateThemeTransition();
 
     // 1. Update avatar locomotion and third-person camera
-    this.avatar.update(delta, this.input);
+    if (this.ship?.boarded) {
+      this.ship.update(delta);
+    } else {
+      this.avatar.update(delta, this.input);
+      this.ship?.update(delta);
+    }
+    if (this.avatar.isMoving || this.avatar.activeTransition || this.ship?.boarded) this.hideIntro?.();
 
     // 2. Update space environment & star path reveal ahead of player
     this.spaceScene.update(delta, this.avatar.position);
+    this.environments?.update(delta, this.avatar.position);
 
     // 3. Update landmarks and check proximity to avatar
     this.landmarks.update(delta, this.avatar.position, (nearby) => {

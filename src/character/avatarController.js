@@ -29,11 +29,10 @@ export class AvatarController {
     this.cameraCurrentPos = new THREE.Vector3().copy(this.position).add(this.cameraOffset);
     this.cameraLookTarget = new THREE.Vector3();
     this.cameraFocusTarget = null;
-    this.orbitAngles = { yaw: 0, pitch: 0.18 };
-    this.zoomDistance = 6.2;
-    // Guard against camera clipping inside avatar mesh (minimum safe distance is 4.0)
+    this.orbitAngles = { yaw: 0, pitch: 0.28 };
+    this.zoomDistance = 7.5;
     this.minZoom = 4.0;
-    this.maxZoom = 12.0;
+    this.maxZoom = 14.0;
 
     // Reduced motion flag
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -50,11 +49,11 @@ export class AvatarController {
 
   init() {
     // Dedicated local key/fill light attached to the avatar so it never fades in dark space
-    const playerKeyLight = new THREE.PointLight(0xe0f2fe, 2.9, 14, 1.4);
-    playerKeyLight.position.set(0, 3.2, 2.5);
+    const playerKeyLight = new THREE.PointLight(0xfff1de, 2.9, 14, 1.4);
+    playerKeyLight.position.set(0, 3.9, 2.5);
     this.root.add(playerKeyLight);
 
-    const playerRimLight = new THREE.PointLight(0x93c5fd, 2.9, 10, 1.5);
+    const playerRimLight = new THREE.PointLight(0xffb98a, 2.9, 10, 1.5);
     playerRimLight.position.set(0, 2.4, -2.5);
     this.root.add(playerRimLight);
 
@@ -142,8 +141,8 @@ export class AvatarController {
     });
 
     const visorMat = new THREE.MeshStandardMaterial({
-      color: 0x0ea5e9,
-      emissive: 0x38bdf8,
+      color: 0xf08a5d,
+      emissive: 0xf2b45a,
       emissiveIntensity: 0.6,
       roughness: 0.1,
       metalness: 0.95
@@ -151,7 +150,7 @@ export class AvatarController {
 
     const thrusterMat = new THREE.MeshStandardMaterial({
       color: 0x00f0ff,
-      emissive: 0x00e5ff,
+      emissive: 0xffcf85,
       emissiveIntensity: 0.8
     });
 
@@ -306,7 +305,11 @@ export class AvatarController {
       // Input movement direction:
       // Forward (W) moves along negative Z (forward into the deep space path)
       // Strafe (A/D) moves along X
-      this.direction.set(moveX, 0, -moveZ).normalize();
+      // Camera-relative: forward = away from the camera, strafe = across the view.
+      const yaw = this.orbitAngles.yaw;
+      const fx = -Math.sin(yaw), fz = -Math.cos(yaw);
+      const rx = Math.cos(yaw), rz = -Math.sin(yaw);
+      this.direction.set(fx * moveZ + rx * moveX, 0, fz * moveZ + rz * moveX).normalize();
 
       const targetVelocity = this.direction.clone().multiplyScalar(baseSpeed);
       this.velocity.lerp(targetVelocity, avatarConfig.movement.acceleration * delta);
@@ -390,46 +393,32 @@ export class AvatarController {
   }
 
   updateCamera(delta) {
-    // Camera is behind and slightly above character, looking forward down the path
-    const pitch = Math.max(-0.2, Math.min(0.8, this.orbitAngles.pitch));
+    // True third-person rig: the camera orbits behind and above the character.
+    const pitch = Math.max(-0.1, Math.min(1.1, this.orbitAngles.pitch));
     const yaw = this.orbitAngles.yaw;
-
-    // Enforce minZoom clamp strictly
-    const currentZoom = Math.max(this.minZoom, this.zoomDistance);
-    const hDist = currentZoom * Math.cos(pitch);
-    const vDist = currentZoom * Math.sin(pitch);
-
-    const offsetX = Math.sin(yaw) * hDist;
-    const offsetZ = Math.cos(yaw) * hDist;
-    const offsetY = Math.max(1.5, vDist);
+    const dist = Math.max(this.minZoom, this.zoomDistance);
+    const hDist = dist * Math.cos(pitch);
+    const vDist = dist * Math.sin(pitch);
+    const pivotY = this.root.position.y + 1.7; // roughly shoulder height
 
     const targetPos = new THREE.Vector3(
-      this.root.position.x + offsetX,
-      this.root.position.y + offsetY + 1.2,
-      this.root.position.z + offsetZ
+      this.root.position.x + Math.sin(yaw) * hDist,
+      pivotY + vDist,
+      this.root.position.z + Math.cos(yaw) * hDist
     );
 
-    // Collision & clipping safety guard: ensure camera position never comes closer
-    // than 3.5 units to avatar center (prevents camera clipping inside head/torso)
-    const avatarCenter = new THREE.Vector3(this.root.position.x, this.root.position.y + 1.3, this.root.position.z);
-    const camDir = new THREE.Vector3().subVectors(targetPos, avatarCenter);
-    if (camDir.length() < 3.8) {
-      camDir.normalize().multiplyScalar(3.8);
-      targetPos.copy(avatarCenter).add(camDir);
-    }
-
-    // Lerp factor (higher factor if reduced motion preferred)
-    const factor = this.reducedMotion ? 1.0 : Math.min(1.0, delta * 7.0);
+    const factor = this.reducedMotion ? 1.0 : Math.min(1.0, delta * 8.0);
     this.cameraCurrentPos.lerp(targetPos, factor);
     this.camera.position.copy(this.cameraCurrentPos);
 
     if (this.cameraFocusTarget) {
       this.cameraLookTarget.lerp(this.cameraFocusTarget, factor);
     } else {
+      // Look slightly above and ahead of the character so they sit low-centre in frame.
       this.cameraLookTarget.set(
-        this.root.position.x,
-        this.root.position.y + 1.4,
-        this.root.position.z - 2.0 // Look slightly ahead down the path
+        this.root.position.x - Math.sin(yaw) * 2,
+        pivotY + 0.6,
+        this.root.position.z - Math.cos(yaw) * 2
       );
     }
     this.camera.lookAt(this.cameraLookTarget);

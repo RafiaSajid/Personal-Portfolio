@@ -151,7 +151,7 @@ export const portfolioData = {
       subtitle: "NED University • Gaming & Animation",
       position: { x: -22, y: 1.5, z: -17 },
       targetZ: -12,
-      color: 0x8b5cf6,
+      color: 0xd06aa8,
       glowColor: "#a855f7",
       type: "about",
       actionText: "Enter About Station Portal",
@@ -165,7 +165,7 @@ export const portfolioData = {
       subtitle: "2D, 3D, VR, Python & C++",
       position: { x: 26, y: 1.8, z: -11 },
       targetZ: -6,
-      color: 0x0ea5e9,
+      color: 0x6fd1b0,
       glowColor: "#38bdf8",
       type: "projects",
       actionText: "Enter Projects Portal",
@@ -213,7 +213,7 @@ export const portfolioData = {
       contribution: "Built the target-shooting experience, immersive environment, haptic gun feedback, a scoring system that increases on target hits and decreases on misses, and teleportation to the main scene.",
       githubUrl: null,
       linkedinUrl: null,
-      videoUrl: null,
+      videoUrl: "./assets/videos/vrgames.mp4",
       thumbnail: null,
       featured: true,
       order: 1
@@ -228,7 +228,7 @@ export const portfolioData = {
       contribution: "Created an animated character in Blender, implemented core game logic, and helped debug the project.",
       githubUrl: null,
       linkedinUrl: null,
-      videoUrl: null,
+      videoUrl: "./assets/videos/eat-right-run.mp4",
       thumbnail: null,
       featured: true,
       order: 2
@@ -273,7 +273,7 @@ export const portfolioData = {
       contribution: "Designed and modeled the character, implemented textures, and created animations.",
       githubUrl: "https://github.com/RafiaSajid/3D-Character",
       linkedinUrl: null,
-      videoUrl: null,
+      videoUrl: "./assets/videos/charmy1.mp4",
       thumbnail: "./assets/thumbnails/3d-character.png",
       featured: true,
       order: 5
@@ -321,7 +321,7 @@ export const portfolioData = {
       contribution: "Built a feature-rich to-do list with options for tasks, topics, and subjects.",
       githubUrl: null,
       linkedinUrl: null,
-      videoUrl: null,
+      videoUrl: "./assets/videos/final%20vid.mp4",
       thumbnail: null,
       featured: false,
       order: 8
@@ -351,7 +351,7 @@ export const portfolioData = {
       contribution: "Designed and implemented the game logic and user interface.",
       githubUrl: null,
       linkedinUrl: null,
-      videoUrl: null,
+      videoUrl: "./assets/videos/tictactoe.mp4",
       thumbnail: null,
       featured: false,
       order: 10

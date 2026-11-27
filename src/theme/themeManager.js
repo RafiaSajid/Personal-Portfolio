@@ -2,58 +2,60 @@
 (function () {
   const STORAGE_KEY = 'rafia-portfolio-theme';
   const THEMES = {
+    /* "Ember & Aubergine": deep plum-black space, warm gold primary, rose + mint secondaries. */
     dark: {
       css: {
-        '--bg': '#020510', '--page-bg': '#060b1a',
-        '--bg-card': 'rgba(8, 14, 32, 0.94)', '--bg-glass': 'rgba(10, 18, 40, 0.78)',
-        '--nav-bg': 'rgba(2, 5, 16, 0.82)', '--nav-mobile-bg': 'rgba(4, 8, 24, 0.98)',
-        '--border': 'rgba(56, 189, 248, 0.22)', '--border-hi': 'rgba(56, 189, 248, 0.6)',
-        '--cyan': '#38bdf8', '--cyan-glow': '#00e5ff', '--violet': '#a855f7', '--violet-dark': '#7c3aed',
-        '--emerald': '#10b981', '--amber': '#f59e0b', '--blue': '#0ea5e9',
-        '--text': '#f1f5f9', '--text-muted': '#b0bfd0', '--text-dim': '#8193a9', '--text-strong': '#ffffff',
-        '--scene-text': '#ffffff', '--scene-muted': '#e3edf8', '--error-text': '#fca5a5',
-        '--scene-accent': '#38bdf8', '--scene-button-text': '#020510',
-        '--text-on-accent': '#020510', '--surface': 'rgba(255,255,255,0.035)',
-        '--surface-raised': 'rgba(255,255,255,0.06)', '--surface-border': 'rgba(255,255,255,0.1)',
-        '--input-bg': 'rgba(255,255,255,0.06)', '--page-backdrop': 'rgba(2,5,16,0.78)',
-        '--shadow-glow': '0 0 24px rgba(56,189,248,0.25)'
+        '--bg': '#08060d', '--page-bg': '#0d0a14',
+        '--bg-card': 'rgba(20, 15, 28, 0.95)', '--bg-glass': 'rgba(24, 17, 34, 0.84)',
+        '--nav-bg': 'rgba(10, 7, 16, 0.88)', '--nav-mobile-bg': 'rgba(12, 9, 19, 0.98)',
+        '--border': 'rgba(242, 180, 90, 0.2)', '--border-hi': 'rgba(242, 180, 90, 0.58)',
+        '--cyan': '#f2b45a', '--cyan-glow': '#ffcf85', '--violet': '#e0709a', '--violet-dark': '#b8527a',
+        '--emerald': '#6fd1b0', '--amber': '#f2b45a', '--blue': '#f08a5d',
+        '--text': '#f4efe8', '--text-muted': '#cfc4b8', '--text-dim': '#a39789', '--text-strong': '#ffffff',
+        '--scene-text': '#ffffff', '--scene-muted': '#f1e8dd', '--error-text': '#ffb4a8',
+        '--scene-accent': '#f2b45a', '--scene-button-text': '#1a1208',
+        '--text-on-accent': '#1a1208', '--surface': 'rgba(255,240,222,0.045)',
+        '--surface-raised': 'rgba(255,240,222,0.075)', '--surface-border': 'rgba(255,240,222,0.12)',
+        '--input-bg': 'rgba(255,240,222,0.07)', '--page-backdrop': 'rgba(8,6,13,0.8)',
+        '--shadow-glow': '0 10px 28px rgba(0,0,0,0.45)'
       },
       three: {
-        background: 0x040914, fog: 0x040914, fogDensity: 0.004,
-        ambientColor: 0x0c1723, ambientIntensity: 1.45,
-        sunColor: 0xdce7f0, sunIntensity: 1.7, rimColor: 0x274663, rimIntensity: 0.8,
-        starColor: 0xe5eef5, starOpacity: 0.76, pathColor: 0x9bd4e4, pathOpacity: 0.78, guideColor: 0x47788b, guideOpacity: 0.18,
-        platformColor: 0x0b121b, platformRoughness: 0.72, platformMetalness: 0.2,
-        planetA: 0x18364a, planetAHalo: 0x3e8195, planetB: 0x23434e, planetBRing: 0x83bfd2,
-        planetC: 0x26384b, asteroid: 0x364654, nebula: [0x20445b, 0x2b555a], nebulaOpacity: 0.14,
-        labelBackground: 'rgba(6, 11, 26, 0.9)', labelText: '#ffffff', pulseOpacity: 0.38, activePulseOpacity: 0.82
+        background: 0x07050c, fog: 0x07050c, fogDensity: 0.0035,
+        ambientColor: 0x1f1626, ambientIntensity: 1.45,
+        sunColor: 0xffe8cc, sunIntensity: 1.7, rimColor: 0x6a3a5c, rimIntensity: 0.8,
+        starColor: 0xf6ecdf, starOpacity: 0.8, pathColor: 0xe9b872, pathOpacity: 0.7, guideColor: 0x8a6a52, guideOpacity: 0.2,
+        platformColor: 0x140f1a, platformRoughness: 0.72, platformMetalness: 0.2,
+        planetA: 0x4a2a3c, planetAHalo: 0xd98a6a, planetB: 0x3a2a4a, planetBRing: 0xe6b97a,
+        planetC: 0x2f3a4a, asteroid: 0x4a4046, nebula: [0x5a2a4a, 0x7a3a3a], nebulaOpacity: 0.16,
+        labelBackground: 'rgba(14, 10, 22, 0.92)', labelText: '#ffffff', pulseOpacity: 0.38, activePulseOpacity: 0.82
       }
     },
+    /* Day: warm parchment surfaces with burnt-amber and plum text; the 3D scene stays a space view. */
     light: {
       css: {
-        '--bg': '#e8f1fb', '--page-bg': '#eff5fc',
-        '--bg-card': 'rgba(255, 255, 255, 0.94)', '--bg-glass': 'rgba(247, 251, 255, 0.84)',
-        '--nav-bg': 'rgba(244, 249, 255, 0.9)', '--nav-mobile-bg': 'rgba(247, 251, 255, 0.98)',
-        '--border': 'rgba(14, 116, 144, 0.24)', '--border-hi': 'rgba(3, 105, 161, 0.56)',
-        '--cyan': '#0369a1', '--cyan-glow': '#0891b2', '--violet': '#7c3aed', '--violet-dark': '#6d28d9',
-        '--emerald': '#047857', '--amber': '#a85208', '--blue': '#0369a1',
-        '--text': '#172b41', '--text-muted': '#3b536d', '--text-dim': '#5d7188', '--text-strong': '#10243a',
-        '--scene-text': '#10243a', '--scene-muted': '#203a55', '--error-text': '#b42318',
-        '--scene-accent': '#063b59', '--scene-button-text': '#ffffff',
-        '--text-on-accent': '#ffffff', '--surface': 'rgba(17, 61, 98, 0.045)',
-        '--surface-raised': 'rgba(17, 61, 98, 0.075)', '--surface-border': 'rgba(17, 61, 98, 0.15)',
-        '--input-bg': 'rgba(255,255,255,0.92)', '--page-backdrop': 'rgba(21, 41, 65, 0.34)',
-        '--shadow-glow': '0 0 24px rgba(3,105,161,0.15)'
+        '--bg': '#efe7da', '--page-bg': '#f6f0e6',
+        '--bg-card': 'rgba(255, 252, 246, 0.95)', '--bg-glass': 'rgba(252, 247, 238, 0.88)',
+        '--nav-bg': 'rgba(248, 242, 232, 0.92)', '--nav-mobile-bg': 'rgba(250, 245, 236, 0.98)',
+        '--border': 'rgba(120, 70, 30, 0.24)', '--border-hi': 'rgba(150, 80, 20, 0.56)',
+        '--cyan': '#8f4208', '--cyan-glow': '#b8560f', '--violet': '#a62f64', '--violet-dark': '#8a2652',
+        '--emerald': '#0b6b52', '--amber': '#8f4208', '--blue': '#a62f64',
+        '--text': '#2a1d14', '--text-muted': '#5a4638', '--text-dim': '#75604f', '--text-strong': '#1c120b',
+        '--scene-text': '#1c120b', '--scene-muted': '#3a2a1e', '--error-text': '#b42318',
+        '--scene-accent': '#7a3708', '--scene-button-text': '#ffffff',
+        '--text-on-accent': '#ffffff', '--surface': 'rgba(90, 50, 20, 0.05)',
+        '--surface-raised': 'rgba(90, 50, 20, 0.085)', '--surface-border': 'rgba(90, 50, 20, 0.16)',
+        '--input-bg': 'rgba(255,252,246,0.95)', '--page-backdrop': 'rgba(40, 24, 14, 0.36)',
+        '--shadow-glow': '0 10px 28px rgba(60,30,10,0.18)'
       },
       three: {
-        background: 0x0a1420, fog: 0x0a1420, fogDensity: 0.0032,
-        ambientColor: 0x253b4b, ambientIntensity: 1.45,
-        sunColor: 0xe7f0f5, sunIntensity: 1.8, rimColor: 0x40647b, rimIntensity: 0.75,
-        starColor: 0xe9f1f5, starOpacity: 0.84, pathColor: 0xb0deea, pathOpacity: 0.88, guideColor: 0x527f8c, guideOpacity: 0.2,
-        platformColor: 0x15222c, platformRoughness: 0.72, platformMetalness: 0.18,
-        planetA: 0x254d60, planetAHalo: 0x548da0, planetB: 0x31555d, planetBRing: 0x9acbd4,
-        planetC: 0x354b59, asteroid: 0x50616b, nebula: [0x3a718a, 0x477b7a], nebulaOpacity: 0.17,
-        labelBackground: 'rgba(246, 250, 255, 0.94)', labelText: '#172b41', pulseOpacity: 0.48, activePulseOpacity: 0.9
+        background: 0x0f0a16, fog: 0x0f0a16, fogDensity: 0.0032,
+        ambientColor: 0x33263a, ambientIntensity: 1.45,
+        sunColor: 0xfff0dc, sunIntensity: 1.8, rimColor: 0x7a4a68, rimIntensity: 0.75,
+        starColor: 0xf8efe4, starOpacity: 0.86, pathColor: 0xf0c88a, pathOpacity: 0.88, guideColor: 0x9a7a60, guideOpacity: 0.22,
+        platformColor: 0x1d1524, platformRoughness: 0.72, platformMetalness: 0.18,
+        planetA: 0x5a3448, planetAHalo: 0xe29a78, planetB: 0x483456, planetBRing: 0xefc98a,
+        planetC: 0x3a4658, asteroid: 0x5a5058, nebula: [0x6e3460, 0x8a4646], nebulaOpacity: 0.19,
+        labelBackground: 'rgba(250, 244, 234, 0.95)', labelText: '#2a1d14', pulseOpacity: 0.48, activePulseOpacity: 0.9
       }
     }
   };

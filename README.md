@@ -37,7 +37,7 @@ The Vercel project uses the repository root. The build command is `npm run build
 3. Add the server-side environment variables listed below in Vercel Project Settings for each intended environment.
 4. Deploy, then open `/`, `/about`, `/projects`, and submit a contact form after configuring a real recipient and provider.
 
-The committed `assets/Portfolio.glb` is about 1.8 MB and is served as a static asset, which is within Vercel's static asset limits. Add project images and videos under `assets/` and reference them with relative paths in the data. Keep large media reasonably compressed; use an external video host for large/streaming videos rather than committing very large video files to Git. There are currently no video files in the repository.
+The committed `assets/Portfolio.glb` is about 1.8 MB and is served as a static asset, which is within Vercel's static asset limits. Add project images and videos under `assets/` and reference them with relative paths in the data. Keep large media reasonably compressed; use an external video host for large/streaming videos rather than committing very large video files to Git. Project videos live in `assets/videos/`; link one by setting `videoUrl` (.mp4/.webm) on its record, and it plays on its Projects-station screen when you walk near.
 
 The main page detects WebGL support and shows a fallback with links to the About and Projects pages if WebGL is unavailable. The 3D scene cannot render in that case, but the content pages do not depend on WebGL.
 
@@ -95,3 +95,8 @@ To enable real delivery:
 3. Submit a real test after deployment and confirm receipt at the destination. A successful HTTP response from a provider is the only success condition shown by the form.
 
 Credentials are read only by the server handlers. The application does not log API keys or message bodies. Provider setup, recipient confirmation, and delivery have not been completed or verified by this repository change.
+
+
+## Flying the starship
+
+A small starship is parked beside the explorer at the start. Walk next to it and press **E** (or tap **Board ship**). Flight: **W/S** throttle, **A/D** steer, **Space** climb, **C** (or Ctrl) dive, **Shift** boost, drag to look around, **E** to land and step out. On touch screens use the D-pad plus the Up / Down / Boost / Land buttons. The ship is available in the home universe only; entering a portal parks it. Movement on foot is camera-relative (W walks away from the camera).
