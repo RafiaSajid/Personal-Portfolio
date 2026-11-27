@@ -15,11 +15,11 @@ export const customCharactersConfig = [
     label: '3D Cat',
     // Configurable GLB model path (e.g. './assets/characters/vr-guide.glb')
     // Defaults to null so scene runs cleanly without requiring models
-    modelPath: './assets/characters/cat.glb',
+    modelPath: './assets/cat.glb',
     // Destination or world position
     destination: 'projects',
-    position: { x: 104, y: 0, z: -88 },
-    scale: 0.6,
+    position: { x: 90, y: 0, z: -88 },
+    scale: 1.0,
     rotationY: Math.PI / 4,
     // Approach trigger distance (meters)
     triggerDistance: 5.0,
@@ -34,10 +34,10 @@ export const customCharactersConfig = [
   {
     id: '3D Character',
     label: '3D Character',
-    modelPath: './assets/characters/3d-char.glb',
+    modelPath: './assets/3d-char.glb',
     destination: 'about',
-    position: { x: -6, y: 0, z: 122 },
-    scale: 0.6,
+    position: { x: 102, y: 0, z: -88 },
+    scale: 0.2,
     rotationY: -Math.PI / 3,
     triggerDistance: 4.5,
     waveCooldown: 8.0,
