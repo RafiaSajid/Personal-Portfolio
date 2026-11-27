@@ -35,7 +35,7 @@ const OWNER = {
 
 const BGM_SRC = "/assets/audio/bd-music.mp3";
 const BADGE_COLORS = { "Group Project": "#ff8a4c", "Solo Project": "#2fd9c5" };
-const DEFAULT_ACCENT = "#7c8cff";
+const DEFAULT_ACCENT = "#f2b45a";
 const INTRO_MS = 4000;
 const PROJECT_MS = 8000;
 const OUTRO_MS = 4000;
@@ -55,13 +55,13 @@ const ICON = {
 const CSS = `
 .pfs-wrap{position:relative;width:100%;max-width:920px;margin:0 auto;aspect-ratio:16/9;min-height:380px;max-height:600px;
   overflow:hidden;border-radius:20px;isolation:isolate;
-  background:radial-gradient(120% 120% at 20% 10%,#1b1f3a 0%,#0b0d1a 55%,#05060d 100%);
+  background:#181818;
   box-shadow:0 20px 60px -20px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.08);
   color:#fff;touch-action:pan-y;container:pfs / inline-size;outline:none;-webkit-tap-highlight-color:transparent;}
 .pfs-wrap:focus-visible{box-shadow:0 0 0 2px #7c8cff,0 20px 60px -20px rgba(0,0,0,.6);}
 .pfs-canvas{position:absolute;inset:0;z-index:0;}
 .pfs-shade{position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:linear-gradient(to top,rgba(5,6,13,.85) 0%,rgba(5,6,13,.35) 32%,rgba(5,6,13,0) 55%);}
+  background:rgba(0,0,0,.34);}
 .pfs-center{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:24px 20px 64px;gap:10px;animation:pfs-out .5s ease 3.5s forwards;pointer-events:none;}
 .pfs-center a{pointer-events:auto;}
@@ -90,7 +90,7 @@ const CSS = `
 .pfs-btn:hover{background:rgba(255,255,255,.22);transform:translateY(-1px);}
 .pfs-btn:focus-visible{outline:2px solid #7c8cff;outline-offset:2px;}
 .pfs-bar{position:absolute;left:0;right:0;bottom:0;height:3px;z-index:4;background:rgba(255,255,255,.12);}
-.pfs-bar-fill{height:100%;width:100%;transform-origin:left center;transform:scaleX(0);background:linear-gradient(90deg,#7c8cff,#2fd9c5);}
+.pfs-bar-fill{height:100%;width:100%;transform-origin:left center;transform:scaleX(0);background:#f2b45a;}
 @container pfs (max-width:560px){
   .pfs-ui{padding:14px 14px 18px;}
   .pfs-bottom{flex-direction:column;align-items:flex-start;gap:12px;}

@@ -3,435 +3,266 @@
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rafia Gull | Game developer portfolio</title>
   <meta name="description"
-    content="About Rafia Gull - Aspiring Game Developer & Computer Science Student in Gaming & Animation at NED University." />
-  <title>About Me | Rafia Gull - Game Developer</title>
+    content="Rafia Gull is a Computer Science student at NED University in Karachi, specializing in Gaming and Animation. Explore her Unity, Unreal Engine and Blender projects." />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Rafia Gull | Game developer portfolio" />
+  <meta property="og:description"
+    content="2D, 3D and VR projects built in Unity, Unreal Engine and Blender, by a Gaming and Animation student at NED University." />
+  <meta property="og:image" content="https://hyh-portfolio.vercel.app/assets/thumbnails/space-splash.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23131209'/%3E%3Ccircle cx='32' cy='32' r='12' fill='%23f2b45a'/%3E%3Cellipse cx='32' cy='32' rx='26' ry='8' fill='none' stroke='%23f4efe8' stroke-width='3' transform='rotate(-20 32 32)'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" />
+  <script>
+    document.documentElement.classList.add('js');
+    // Failsafe: if the module never runs, show the content and drop the loader.
+    setTimeout(function () {
+      if (window.__edReady) return;
+      document.documentElement.classList.remove('js');
+      var l = document.getElementById('loading-screen'); if (l) l.style.display = 'none';
+    }, 6000);
+  </script>
   <script src="./src/theme/themeManager.js"></script>
-  <link rel="stylesheet" href="./styles/style.css" />
+  <link rel="stylesheet" href="./styles/about-editorial.css" />
   <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
-      }
-    }
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    } }
   </script>
 </head>
 
-<body class="page-mode about-page">
-  <!-- Top Navigation Bar -->
-  <header id="top-nav" role="banner">
-    <a href="./index.html" class="nav-brand" aria-label="Return to Home 3D Scene">
-      <div class="nav-brand-dot" aria-hidden="true"></div>
-      <div>
-        <div class="nav-brand-name">RAFIA GULL</div>
-        <div class="nav-brand-role">GAMING & ANIMATION • NED UNIVERSITY</div>
-      </div>
-    </a>
+<body>
+  <a class="ed-skip" href="#main">Skip to content</a>
 
-    <nav aria-label="Main Navigation">
-      <ul class="nav-links">
-        <li><a href="./index.html">Home</a></li>
-        <li><a href="./about.html" aria-current="page">About Me</a></li>
-        <li><a href="./projects.html">Projects</a></li>
-        <li><a href="./index.html#education">Education</a></li>
-        <li><a href="./index.html#skills">Skills</a></li>
-        <li><a href="#contact-section">Contact</a></li>
-      </ul>
-    </nav>
-
-    <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark theme"
-      aria-describedby="theme-status" data-theme-toggle>
-      <span class="theme-orbit" aria-hidden="true"><span class="theme-orbit-planet"></span><span
-          class="theme-star one"></span><span class="theme-star two"></span><span
-          class="theme-star three"></span></span>
-      <span class="theme-thumb" aria-hidden="true"></span>
-    </button>
-    <span id="theme-status" class="sr-only" role="status" aria-live="polite" data-theme-status></span>
-    <button id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">&#9776;</button>
-  </header>
-
-  <!-- Mobile Dropdown Menu -->
-  <div id="nav-mobile" role="navigation" aria-label="Mobile Navigation">
-    <a href="./index.html">Home (3D Scene)</a>
-    <a href="./about.html" aria-current="page">About Me</a>
-    <a href="./projects.html">Projects</a>
-    <a href="./index.html#education">Education</a>
-    <a href="./index.html#skills">Skills</a>
-    <a href="#contact-section">Contact</a>
+  <!-- Same loader as the 3D home page -->
+  <div id="loading-screen" role="status" aria-live="polite">
+    <div class="loading-ring" aria-hidden="true"></div>
+    <div id="loading-message">Initializing 3D Space...</div>
   </div>
 
-  <!-- Page Content -->
-  <main class="page-layout">
-    <a href="./index.html" class="back-link" aria-label="Return to 3D Space Journey">Return to 3D Scene</a>
-
-    <section class="page-hero">
-      <h1>RAFIA GULL</h1>
-      <p class="subtitle">Aspiring Game Developer • Computer Science Student • NED University</p>
-      <p>
-        Computer Science student at <strong>NED University</strong> specializing in <strong>Gaming and
-          Animation</strong>.
-        Experience delivering 2D, 3D, and VR projects using Unity and Unreal Engine, with additional projects in Python
-        and C++.
-      </p>
+  <main id="main">
+    <!-- 1. Hero -->
+    <section class="ed-hero" id="top" aria-labelledby="hero-title">
+      <p class="ed-eyebrow" data-reveal>Portfolio · Karachi, Pakistan</p>
+      <h1 class="display ed-hero-title" id="hero-title" aria-label="Rafia Gull">
+        <span class="ed-line"><span class="ed-line-in ed-grad" style="--i:0">Rafia</span></span>
+        <span class="ed-line"><span class="ed-line-in ed-grad" style="--i:1">Gull</span></span>
+      </h1>
+      <div class="ed-hero-foot">
+        <p class="body-3 ed-hero-lede" data-reveal>
+          Game developer in the making. I study Computer Science at NED University, specializing in Gaming and
+          Animation, and I build 2D, 3D and VR projects in Unity, Unreal Engine and Blender.
+        </p>
+        <a class="title-1 ed-link-big" href="#work" data-roll>See the work
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor"
+            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 17L17 7M8 7h9v9" />
+          </svg></a>
+      </div>
+      <p class="ed-scroll-cue caption-3" aria-hidden="true">Scroll</p>
     </section>
 
-    <section class="archive-experience" aria-labelledby="archive-title">
-      <div class="archive-heading">
-        <span class="archive-kicker">PERSONAL ARCHIVE</span>
-        <h2 id="archive-title">A path through games, study, and making</h2>
-        <p>Select a record to read more. Each view uses the portfolio's structured content.</p>
-      </div>
-      <div class="archive-layout">
-        <nav class="archive-index" aria-label="About archive records">
-          <button type="button" data-exhibit="study" aria-pressed="true">Academic studies</button>
-          <button type="button" data-exhibit="vr" aria-pressed="false">VR game work</button>
-          <button type="button" data-exhibit="animation" aria-pressed="false">3D and motion tools</button>
-        </nav>
-        <article class="archive-story" id="archive-story" aria-live="polite" aria-atomic="true">
-          <span class="archive-story-label">FIELD NOTE</span>
-          <h3 id="archive-story-title">Academic studies</h3>
-          <p id="archive-story-body"></p>
-          <p class="archive-story-detail" id="archive-story-detail"></p>
-        </article>
+    <!-- 2. Marquee: tools and credentials (real data only) -->
+    <section class="ed-marquee" aria-label="Tools, credentials and projects">
+      <div class="ed-marquee-row" data-marquee="tools"></div>
+      <div class="ed-marquee-row ed-reverse" data-marquee="projects"></div>
+    </section>
+
+    <!-- 3. Story -->
+    <section class="ed-section" id="story" aria-labelledby="story-title">
+      <span id="education" class="ed-anchor"></span><span id="certifications" class="ed-anchor"></span>
+      <p class="ed-eyebrow" data-reveal>01 / Hello</p>
+      <h2 class="heading-2 ed-wide" id="story-title" data-split>Hi, I am Rafia. This is how I got here and what I am working on.</h2>
+      <div class="ed-story">
+        <div class="ed-story-copy">
+          <p class="body-3" data-split>I am a Computer Science student at NED University in Karachi, Pakistan, with a specialization in Gaming and Animation.</p>
+          <p class="body-3" data-split>Most of my hands on work lives in Unity and Unreal Engine: 2D, 3D and immersive VR projects, plus foundational software and games written in Python and C++.</p>
+          <p class="body-3" data-split>I care about the parts that make a game feel right. Core gameplay mechanics, character animation, physics systems and the small problems nobody sees until they break.</p>
+          <p class="body-3" data-split>I am open to game development internships, gameplay programming projects and technical collaborations.</p>
+        </div>
+        <dl class="ed-facts" aria-label="Quick facts">
+          <div><dt class="caption-3">Studying</dt><dd class="title-2" data-fact="degree"></dd></div>
+          <div><dt class="caption-3">Focus</dt><dd class="title-2" data-fact="specialization"></dd></div>
+          <div><dt class="caption-3">Status</dt><dd class="title-2" data-fact="status"></dd></div>
+          <div><dt class="caption-3">Based in</dt><dd class="title-2" data-fact="location"></dd></div>
+          <div><dt class="caption-3">Certified</dt><dd class="title-2" data-fact="certs"></dd></div>
+        </dl>
       </div>
     </section>
 
-    <!-- Background & Scope -->
-    <div class="section-heading">
-      <h2>PROFILE & BACKGROUND</h2>
-    </div>
+    <!-- 4. Tagline reveal (word by word on scroll) -->
+    <section class="ed-section ed-tagline" aria-label="Tagline">
+      <p class="heading-1 ed-wide" id="tagline" data-words>Good games are built from small decisions. I like making each one feel intentional.</p>
+    </section>
 
-    <div class="about-grid">
-      <article class="info-card">
-        <h3>ACADEMIC STUDIES</h3>
-        <p>
-          Enrolled in the <strong>Bachelor of Science in Computer Science</strong> program at <strong>NED
-            University</strong> in Karachi, Sindh, Pakistan, with a specialized focus in <strong>Gaming and
-            Animation</strong>.
-        </p>
-        <p style="margin-top:0.5rem; font-size:0.8rem; color:var(--emerald);">
-          <strong>Status:</strong> Currently studying
-        </p>
-      </article>
-
-      <article class="info-card">
-        <h3>GAME DEVELOPMENT SCOPE</h3>
-        <p>
-          Hands-on technical implementation across <strong>Unity (2D, 3D, VR)</strong> and <strong>Unreal Engine (3D
-            runner & visualization)</strong>, covering target shooting, haptic feedback, health systems, dialogue trees,
-          and 3D character animation in Blender.
-        </p>
-      </article>
-
-      <article class="info-card">
-        <h3>SYSTEMS & SOFTWARE</h3>
-        <p>
-          Software engineering background in <strong>C++ (SDL2, data structures, Minimax AI)</strong> and <strong>Python
-            (PyQt5 desktop apps, MySQL database integration, Streamlit web applications)</strong>.
-        </p>
-      </article>
-
-      <article class="info-card">
-        <h3>LOCATION & AVAILABILITY</h3>
-        <p>
-          <strong>Location:</strong> Karachi, Sindh, Pakistan
-        </p>
-        <p style="margin-top:0.4rem; color:var(--text-muted); font-size:0.85rem;">
-          Open to game development internships, gameplay programming projects, and technical collaborations.
-        </p>
-      </article>
-    </div>
-    <!-- Certifications Section -->
-    <div class="section-heading">
-      <h2>CERTIFICATIONS</h2>
-    </div>
-
-    <div class="about-grid">
-      <article class="info-card">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <h3>UNREAL COURSE</h3>
-          <span class="edu-badge">CEGA CERTIFIED</span>
+    <!-- 5. Featured work: sticky, scroll driven -->
+    <section class="ed-section" id="work" aria-labelledby="work-title">
+      <p class="ed-eyebrow" data-reveal>02 / Featured work</p>
+      <h2 class="heading-2 ed-wide" id="work-title" data-split>Projects I would show first.</h2>
+      <div class="ed-feature" id="feature">
+        <div class="ed-steps" id="feature-steps"></div>
+        <div class="ed-stage-wrap">
+          <div class="ed-stage" id="feature-stage" aria-live="off">
+            <div class="ed-stage-media" id="feature-media"></div>
+            <div class="ed-stage-meta caption-3"><span id="feature-count">01 / 01</span><span class="ed-stage-bar"><i id="feature-bar"></i></span></div>
+          </div>
         </div>
-        <p style="margin-top:0.4rem;">
-          Practical game development and visualization in Unreal Engine.
-        </p>
-      </article>
+      </div>
+    </section>
 
-      <article class="info-card">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <h3>PRE-PRODUCTION COURSE</h3>
-          <span class="edu-badge">CEGA CERTIFIED</span>
+    <!-- 6. Showreel (existing interactive component) -->
+    <section class="ed-section" id="reel" aria-labelledby="reel-title">
+      <p class="ed-eyebrow" data-reveal>03 / Showreel</p>
+      <h2 class="heading-3 ed-wide" id="reel-title" data-split>A quick loop through every project.</h2>
+      <div id="showcase-root" class="ed-reel"></div>
+    </section>
+
+    <!-- 7. On the clock / Off the clock -->
+    <section class="ed-section" id="archive" aria-labelledby="archive-title">
+      <p class="ed-eyebrow" data-reveal>04 / The archive</p>
+      <h2 class="heading-2 ed-wide" id="archive-title" data-split>On the clock and off it.</h2>
+
+      <div class="ed-group" data-group="team">
+        <div class="ed-group-head">
+          <h3 class="heading-3" data-split>On the clock</h3>
+          <p class="body-6 ed-muted">Team projects</p>
         </div>
-        <p style="margin-top:0.4rem;">
-          Story writing, character design, storyboarding, prop design, and environment design.
-        </p>
-      </article>
-    </div>
-
-    <!-- Skills Summary -->
-    <div class="section-heading" id="skills-section">
-      <h2>TECHNICAL SKILLS MATRIX</h2>
-    </div>
-
-    <div class="about-grid">
-      <article class="info-card">
-        <h3>PROGRAMMING LANGUAGES</h3>
-        <p>C#, C, C++, Python</p>
-      </article>
-
-      <article class="info-card">
-        <h3>ENGINES & FRAMEWORKS</h3>
-        <p>Unity, Unreal Engine, SDL2, PyQt5</p>
-      </article>
-
-      <article class="info-card">
-        <h3>TOOLS & SOFTWARE</h3>
-        <p>Blender, Adobe After Effects</p>
-      </article>
-
-      <article class="info-card">
-        <h3>DATABASE & UI</h3>
-        <p>MySQL, PyQt5 UI, Pygame UI, Unity UI Toolkit</p>
-      </article>
-
-      <article class="info-card" style="grid-column: 1 / -1;">
-        <h3>CORE PROBLEM SOLVING</h3>
-        <p>Debugging, problem solving, idea generation, Minimax AI, and data structures.</p>
-      </article>
-    </div>
-
-    <div id="skills-details" class="about-grid skills-details-grid" aria-label="Skill descriptions"></div>
-
-    <!-- Portfolio Showcase Section -->
-    <div class="section-heading" id="showcase-section">
-      <h2>PORTFOLIO SHOWCASE</h2>
-    </div>
-    <div id="showcase-root" style="margin-bottom: 3rem;"></div>
-
-    <!-- Interactive Contact Form Section -->
-    <div class="section-heading" id="contact-section">
-      <h2>CONTACT</h2>
-    </div>
-
-    <div class="contact-card-container">
-      <div class="contact-card-intro">
-        <p style="color:var(--text-muted); font-size:0.92rem; line-height:1.6; margin-bottom:1.5rem;">
-          Have a question about my game development projects, internships, or technical collaborations? Send a direct
-          dispatch below.
-        </p>
-        <!-- <p style="font-size:0.82rem; color:var(--text-dim); margin-bottom:1.5rem;">
-          <strong>Direct Email:</strong> abc@gmail.com <span style="color:var(--amber);">(Placeholder recipient until
-            confirmed)</span>
-        </p> -->
+        <div class="ed-grid"></div>
       </div>
 
-      <div id="contact-feedback" class="contact-feedback-banner" style="display:none;" role="status"></div>
-
-      <form id="contact-form" class="cyber-contact-form" novalidate>
-        <!-- Honeypot Field (Hidden to real visitors, traps spambots) -->
-        <div style="display:none !important;" aria-hidden="true">
-          <label for="gotcha-field">Leave this empty</label>
-          <input type="text" id="gotcha-field" name="_gotcha" tabindex="-1" autocomplete="off" />
+      <div class="ed-group" data-group="solo">
+        <div class="ed-group-head">
+          <h3 class="heading-3" data-split>Off the clock</h3>
+          <p class="body-6 ed-muted">Solo projects</p>
         </div>
+        <div class="ed-grid"></div>
+      </div>
 
-        <div class="form-row">
-          <div class="form-field">
-            <label for="contact-name">YOUR NAME <span class="required">*</span></label>
-            <input type="text" id="contact-name" name="name" required placeholder="e.g. Commander Shepard"
-              maxlength="100" autocomplete="name" />
-          </div>
-
-          <div class="form-field">
-            <label for="contact-email">EMAIL ADDRESS <span class="required">*</span></label>
-            <input type="email" id="contact-email" name="email" required placeholder="e.g. shepard@normandy.space"
-              maxlength="150" autocomplete="email" />
-          </div>
+      <div class="ed-group" data-group="more" hidden>
+        <div class="ed-group-head">
+          <h3 class="heading-3" data-split>Also in the archive</h3>
+          <p class="body-6 ed-muted">More projects</p>
         </div>
+        <div class="ed-grid"></div>
+      </div>
+    </section>
 
-        <div class="form-field">
-          <label for="contact-subject">SUBJECT <span class="required">*</span></label>
-          <input type="text" id="contact-subject" name="subject" required
-            placeholder="e.g. Game Development Collaboration" maxlength="150" />
+    <!-- 8. Skills index -->
+    <section class="ed-section" id="skills" aria-labelledby="skills-title">
+      <span id="skills-section" class="ed-anchor"></span>
+      <p class="ed-eyebrow" data-reveal>05 / Toolbox</p>
+      <h2 class="heading-3 ed-wide" id="skills-title" data-split>What I work with, and what I use it for.</h2>
+      <div class="ed-skills" id="skills-index"></div>
+    </section>
+
+    <!-- 9. Contact -->
+    <section class="ed-section ed-contact" id="contact" aria-labelledby="contact-title">
+      <span id="contact-section" class="ed-anchor"></span>
+      <p class="ed-eyebrow" data-reveal>06 / Contact</p>
+      <h2 class="display-2 ed-wide" id="contact-title" data-split>Let’s build something together.</h2>
+      <div class="ed-contact-grid">
+        <p class="body-3 ed-muted ed-contact-intro" data-reveal>Tell me about the project, the team or the internship you have in mind. I read every message.</p>
+
+        <div>
+          <div id="contact-feedback" class="contact-feedback-banner" style="display:none;" role="status"></div>
+          <form id="contact-form" class="ed-form" novalidate>
+            <div class="ed-hp" aria-hidden="true">
+              <label for="gotcha-field">Leave this empty</label>
+              <input type="text" id="gotcha-field" name="_gotcha" tabindex="-1" autocomplete="off" />
+            </div>
+            <div class="form-field">
+              <label for="contact-name">Your name</label>
+              <input type="text" id="contact-name" name="name" required placeholder="Your name" maxlength="100" autocomplete="name" />
+            </div>
+            <div class="form-field">
+              <label for="contact-email">Email address</label>
+              <input type="email" id="contact-email" name="email" required placeholder="you@example.com" maxlength="150" autocomplete="email" />
+            </div>
+            <div class="form-field">
+              <label for="contact-subject">Subject</label>
+              <input type="text" id="contact-subject" name="subject" required placeholder="What is this about?" maxlength="150" />
+            </div>
+            <div class="form-field">
+              <label for="contact-message">Message</label>
+              <textarea id="contact-message" name="message" rows="5" required placeholder="At least 10 characters" maxlength="3000"></textarea>
+              <span class="field-hint caption-5">Up to 3,000 characters. Your text stays in the form if sending fails.</span>
+            </div>
+            <button type="submit" class="ed-btn">Send message</button>
+          </form>
+          <ul class="ed-socials" id="contact-links" aria-label="Profiles"></ul>
         </div>
-
-        <div class="form-field">
-          <label for="contact-message">MESSAGE <span class="required">*</span></label>
-          <textarea id="contact-message" name="message" rows="5" required
-            placeholder="Write your message here (min. 10 characters)..." maxlength="3000"></textarea>
-          <span class="field-hint">Max 3,000 characters. Your message is preserved if delivery fails.</span>
-        </div>
-
-        <button type="submit" class="contact-submit-btn">
-          <span>TRANSMIT MESSAGE</span> &rarr;
-        </button>
-      </form>
-    </div>
-
-    <!-- Actions -->
-    <div class="section-heading" style="margin-top:3rem;">
-      <h2>NEXT STEPS</h2>
-    </div>
-
-    <div class="about-grid">
-      <article class="info-card">
-        <h3>EXPLORE PROJECTS</h3>
-        <p>Browse all 7 projects including VR Games Hub, Eat Right Run, The Parallel Eclipse, and Cherrysweeper.</p>
-        <div style="margin-top: 1rem;">
-          <a href="./projects.html" class="card-btn card-btn-primary"
-            style="display:inline-block; padding: 0.5rem 1.2rem;">View Projects Catalog &rarr;</a>
-        </div>
-      </article>
-
-      <article class="info-card">
-        <h3>RETURN TO 3D STAR PATH</h3>
-        <p>Experience the interactive real-time space journey and visit the landmark stars.</p>
-        <div style="margin-top: 1rem;">
-          <a href="./index.html" class="card-btn card-btn-secondary"
-            style="display:inline-block; padding: 0.5rem 1.2rem;">Launch 3D Scene &rarr;</a>
-        </div>
-      </article>
-    </div>
+      </div>
+    </section>
   </main>
 
-  <!-- Space-Themed Animated Footer -->
-  <footer id="site-footer" role="contentinfo">
-    <div class="footer-space-track" aria-hidden="true">
-      <div class="footer-orbit-particle"></div>
-    </div>
-    <div class="footer-container">
-      <div class="footer-main">
-        <div class="footer-brand">
-          <div class="footer-title">RAFIA GULL</div>
-          <div class="footer-subtitle">Aspiring Game Developer • Gaming & Animation</div>
-          <p class="footer-summary">Computer Science student at NED University specializing in Gaming and Animation.
-            Building 2D, 3D, and VR projects in Unity and Unreal Engine.</p>
-        </div>
-        <div class="footer-nav-groups">
-          <div class="footer-nav-col">
-            <div class="footer-col-heading">Navigation</div>
-            <a href="./index.html">Home (3D Scene)</a>
-            <a href="./about.html" aria-current="page">About Me</a>
-            <a href="./projects.html">Projects Catalog</a>
-            <a href="./index.html#education">Education</a>
-            <a href="./index.html#skills">Skills</a>
-          </div>
-          <div class="footer-nav-col">
-            <div class="footer-col-heading">Station & Inquiries</div>
-            <a href="#contact-section">Direct Contact</a>
-            <a href="./index.html#chat">ASTRA AI Companion</a>
-            <a href="./index.html#about">Orbital Station Archive</a>
-          </div>
-          <div class="footer-nav-col">
-            <div class="footer-col-heading">Legal & Policies</div>
-            <button type="button" class="footer-legal-btn" data-legal-trigger="privacy">Privacy Policy</button>
-            <button type="button" class="footer-legal-btn" data-legal-trigger="terms">Terms of Use</button>
-          </div>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <div>&copy; 2026 Rafia Gull. All rights reserved.</div>
-        <div class="footer-coords-status">
-          <span class="footer-status-dot" aria-hidden="true"></span>
-          <span>ORBITAL STATION ARCHIVE // ONLINE</span>
-        </div>
+  <!-- Footer with hand drawn ASCII ship -->
+  <footer id="site-footer" class="ed-footer" role="contentinfo">
+    <pre class="ed-ascii" aria-hidden="true">
+              *        .
+        .          /\       *
+                  /  \
+     *           / ** \         .
+                |  ()  |
+       .        |      |    *
+               /|======|\
+              / |  ||  | \
+             /__|__||__|__\
+                /_/\/\_\
+        .        ^^  ^^        *
+          ~  ~  ~~  ~~  ~  ~
+    </pre>
+    <div class="ed-footer-grid">
+      <p class="title-2">Rafia Gull<br /><span class="ed-muted body-6">Game developer in the making. Karachi, Pakistan.</span></p>
+      <nav aria-label="Site pages">
+        <a class="body-5" href="./index.html" data-roll>Explore the 3D space</a>
+        <a class="body-5" href="./projects.html" data-roll>Projects catalog</a>
+        <a class="body-5" href="#contact" data-roll>Contact</a>
+      </nav>
+      <div class="ed-legal">
+        <button type="button" class="footer-legal-btn body-5" data-legal-trigger="privacy">Privacy policy</button>
+        <button type="button" class="footer-legal-btn body-5" data-legal-trigger="terms">Terms of use</button>
       </div>
     </div>
+    <p class="caption-5 ed-muted ed-copy">&copy; 2026 Rafia Gull. All rights reserved.</p>
   </footer>
 
-  <!-- Legal Modal Dialog -->
-  <div id="legal-modal" class="legal-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="legal-modal-title"
-    aria-hidden="true">
+  <!-- Floating bottom dock -->
+  <nav class="ed-dock" aria-label="Primary">
+    <a class="ed-dock-link" href="./index.html">Space</a>
+    <a class="ed-dock-link" href="#story" data-spy="story">Story</a>
+    <a class="ed-dock-link" href="#work" data-spy="work">Work</a>
+    <a class="ed-dock-link" href="#contact" data-spy="contact">Contact</a>
+    <button class="ed-dock-theme" type="button" role="switch" aria-checked="false" aria-label="Dark theme"
+      aria-describedby="theme-status" data-theme-toggle>
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor"
+        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4" />
+      </svg>
+    </button>
+    <span id="theme-status" class="sr-only" role="status" aria-live="polite" data-theme-status></span>
+  </nav>
+
+  <!-- Legal modal (used by footerManager) -->
+  <div id="legal-modal" class="legal-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="legal-modal-title" aria-hidden="true">
     <div class="legal-modal-box">
       <div class="legal-modal-header">
-        <h3 id="legal-modal-title">LEGAL NOTICE</h3>
+        <h3 id="legal-modal-title">Legal notice</h3>
         <button id="legal-modal-close" class="legal-modal-close" aria-label="Close dialog">&times;</button>
       </div>
       <div id="legal-modal-body" class="legal-modal-body"></div>
     </div>
   </div>
 
-  <script type="module">
-    import { ContactManager } from './src/contact/contactManager.js';
-    import { PerspectiveGrid } from './src/contact/perspectiveGrid.js';
-    import { FooterManager } from './src/ui/footerManager.js';
-    import { portfolioData } from './src/data/portfolioData.js';
-    import { mountShowcase } from './src/components/PortfolioShowcase.js';
-
-    mountShowcase(document.getElementById('showcase-root'));
-    new ContactManager('contact-form', 'contact-feedback');
-    new PerspectiveGrid('.contact-card-container');
-    new FooterManager();
-
-    const vrProject = portfolioData.projects.find((project) => project.id === 'vr-games-hub');
-    const blenderSkill = portfolioData.skills.flatMap((group) => group.items).find((skill) => skill.name === 'Blender');
-    const skillDetails = document.getElementById('skills-details');
-    portfolioData.skills.forEach((group) => {
-      const section = document.createElement('article');
-      section.className = 'info-card';
-      const heading = document.createElement('h3');
-      heading.textContent = group.category;
-      section.append(heading);
-      group.items.forEach((skill) => {
-        const item = document.createElement('div');
-        item.className = 'skill-description';
-        const name = document.createElement('h4');
-        name.textContent = skill.name;
-        const description = document.createElement('p');
-        description.textContent = skill.desc;
-        item.append(name, description);
-        section.append(item);
-      });
-      skillDetails.append(section);
-    });
-    const exhibits = {
-      study: {
-        title: 'Academic studies',
-        body: `${portfolioData.education.degree} at ${portfolioData.education.institution}, specializing in ${portfolioData.education.specialization}.`,
-        detail: `${portfolioData.education.location}. ${portfolioData.education.status}. ${portfolioData.education.summary}`
-      },
-      vr: {
-        title: vrProject?.title || 'VR game work',
-        body: vrProject?.details || '',
-        detail: vrProject?.contribution || ''
-      },
-      animation: {
-        title: '3D and motion tools',
-        body: blenderSkill?.desc || '',
-        detail: portfolioData.skills.find((group) => group.category === 'Tools & Software')?.items
-          .filter((skill) => skill.name !== 'Blender')
-          .map((skill) => `${skill.name}: ${skill.desc}`)
-          .join(' ') || ''
-      }
-    };
-    const exhibitTitle = document.getElementById('archive-story-title');
-    const exhibitBody = document.getElementById('archive-story-body');
-    const exhibitDetail = document.getElementById('archive-story-detail');
-    document.querySelectorAll('[data-exhibit]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const exhibit = exhibits[button.dataset.exhibit];
-        if (!exhibit) return;
-        document.querySelectorAll('[data-exhibit]').forEach((item) => {
-          item.setAttribute('aria-pressed', String(item === button));
-        });
-        exhibitTitle.textContent = exhibit.title;
-        exhibitBody.textContent = exhibit.body;
-        exhibitDetail.textContent = exhibit.detail;
-      });
-    });
-    exhibitBody.textContent = exhibits.study.body;
-    exhibitDetail.textContent = exhibits.study.detail;
-
-    const navToggle = document.getElementById('nav-toggle');
-    const navMobile = document.getElementById('nav-mobile');
-    if (navToggle && navMobile) {
-      navToggle.addEventListener('click', () => {
-        const isOpen = navMobile.classList.toggle('open');
-        navToggle.setAttribute('aria-expanded', isOpen);
-      });
-    }
-  </script>
+  <noscript><p class="ed-noscript">This page works best with JavaScript on. You can still read everything here and open the <a href="./projects.html">projects catalog</a>.</p></noscript>
+  <script type="module" src="./src/ui/aboutEditorial.js"></script>
 </body>
 
 </html>
